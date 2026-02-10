@@ -7,7 +7,7 @@ const skills = [
     {name: 'Addestrare Animali', ability: 'SAG'},
     {name: 'Arcano', ability: 'INT'},
     {name: 'Atletica', ability: 'FOR'},
-    {name: 'Furtività', ability: 'DES'},
+    {name: 'Furtivita\'', ability: 'DES'},
     {name: 'Indagare', ability: 'INT'},
     {name: 'Inganno', ability: 'CAR'},
     {name: 'Intimidire', ability: 'CAR'},
@@ -17,7 +17,7 @@ const skills = [
     {name: 'Natura', ability: 'INT'},
     {name: 'Percezione', ability: 'SAG'},
     {name: 'Persuasione', ability: 'CAR'},
-    {name: 'Rapidità di mano', ability: 'DES'},
+    {name: 'Rapidita\' di mano', ability: 'DES'},
     {name: 'Religione', ability: 'INT'},
     {name: 'Sopravvivenza', ability: 'SAG'},
     {name: 'Storia', ability: 'INT'}
@@ -131,15 +131,15 @@ function initializeSkills() {
         row.className = 'skill-row';
         row.innerHTML = `
             <span class="skill-name">${skill.name} (${skill.ability})</span>
-            <span class="skill-mod" id="skill_${skill.name.replace(/\s+/g, '_')}">+0</span>
-            <input type="checkbox" class="form-check-input skill-checkbox" id="prof_${skill.name.replace(/\s+/g, '_')}">
-            <input type="checkbox" class="form-check-input skill-checkbox" id="mastery_${skill.name.replace(/\s+/g, '_')}">
+            <span class="skill-mod" id="skill_${skill.name.replace(/\s+/g, '_').replace(/'/g, '')}">+0</span>
+            <input type="checkbox" class="skill-checkbox" id="prof_${skill.name.replace(/\s+/g, '_').replace(/'/g, '')}">
+            <input type="checkbox" class="skill-checkbox" id="mastery_${skill.name.replace(/\s+/g, '_').replace(/'/g, '')}">
         `;
         container.appendChild(row);
         
         // Add event listeners
-        const profId = `prof_${skill.name.replace(/\s+/g, '_')}`;
-        const masteryId = `mastery_${skill.name.replace(/\s+/g, '_')}`;
+        const profId = `prof_${skill.name.replace(/\s+/g, '_').replace(/'/g, '')}`;
+        const masteryId = `mastery_${skill.name.replace(/\s+/g, '_').replace(/'/g, '')}`;
         
         document.getElementById(profId).addEventListener('change', function() {
             if (this.checked) {
@@ -161,7 +161,7 @@ function updateSkills() {
     const profBonus = parseInt(document.getElementById('profBonus').value) || 2;
     
     skills.forEach(skill => {
-        const skillId = skill.name.replace(/\s+/g, '_');
+        const skillId = skill.name.replace(/\s+/g, '_').replace(/'/g, '');
         const abilityUsed = skillScaling[skill.name] || skill.ability;
         const modifier = abilityModifiers[abilityUsed] || 0;
         const isProficient = document.getElementById(`prof_${skillId}`).checked;
@@ -184,7 +184,8 @@ function updateSkills() {
 
 function updatePassivePerception() {
     const perceptionId = 'Percezione'.replace(/\s+/g, '_');
-    const skillMod = parseInt(document.getElementById(`skill_${perceptionId}`).textContent) || 0;
+    const skillModText = document.getElementById(`skill_${perceptionId}`).textContent;
+    const skillMod = parseInt(skillModText) || 0;
     const passive = 10 + skillMod;
     document.getElementById('passivePerception').textContent = passive;
 }
@@ -226,10 +227,10 @@ function addEquipmentItem() {
     const row = document.createElement('div');
     row.className = 'equipment-row';
     row.innerHTML = `
-        <input type="text" class="form-control form-control-sm" placeholder="Oggetto" style="flex: 2;">
-        <input type="number" class="form-control form-control-sm" placeholder="1" style="flex: 0.5;">
-        <input type="text" class="form-control form-control-sm" placeholder="Note" style="flex: 1.5;">
-        <button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕</button>
+        <input type="text" class="form-control form-control-sm" placeholder="Oggetto">
+        <input type="number" class="form-control form-control-sm" placeholder="1" style="width: 60px;">
+        <input type="text" class="form-control form-control-sm" placeholder="Note">
+        <button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">X</button>
     `;
     container.appendChild(row);
 }
@@ -249,12 +250,12 @@ function initializeSpells() {
     const spellLevelsContainer = document.getElementById('spellLevelsContainer');
     for (let level = 1; level <= 9; level++) {
         const card = document.createElement('div');
-        card.className = 'card mb-3';
+        card.className = 'card mb-2';
         card.innerHTML = `
-            <div class="card-header bg-primary text-white">
-                ✨ INCANTESIMI DI ${level}° LIVELLO
+            <div class="card-header">
+                INCANTESIMI DI ${level}° LIVELLO
             </div>
-            <div class="card-body" id="spellLevel${level}Container">
+            <div class="card-body p-2" id="spellLevel${level}Container">
             </div>
         `;
         spellLevelsContainer.appendChild(card);
@@ -299,7 +300,7 @@ function initializeScaling() {
         col.innerHTML = `
             <div class="scaling-skill-card">
                 <label>${skill.name}</label>
-                <select class="form-select form-select-sm" id="scaling_${skill.name.replace(/\s+/g, '_')}">
+                <select class="form-select form-select-sm" id="scaling_${skill.name.replace(/\s+/g, '_').replace(/'/g, '')}">
                     ${abilities.map(ab => `<option value="${ab}" ${ab === skill.ability ? 'selected' : ''}>${ab}</option>`).join('')}
                 </select>
             </div>
@@ -317,7 +318,7 @@ function initializeScaling() {
 }
 
 function updateSkillLabel(skillName) {
-    const skillId = skillName.replace(/\s+/g, '_');
+    const skillId = skillName.replace(/\s+/g, '_').replace(/'/g, '');
     const skillRow = document.querySelector(`#skill_${skillId}`).closest('.skill-row');
     const newAbility = skillScaling[skillName];
     skillRow.querySelector('.skill-name').textContent = `${skillName} (${newAbility})`;
@@ -468,7 +469,7 @@ function handleCharImageUpload(event) {
 function displayCharImage() {
     const container = document.getElementById('charImageContainer');
     if (characterImages.length === 0) {
-        container.innerHTML = '<p class="text-muted">Nessuna immagine caricata</p>';
+        container.innerHTML = '<p class="text-muted small">Nessuna immagine</p>';
         return;
     }
     
@@ -531,7 +532,7 @@ function handleDMImageUpload(event) {
 function displayDMImage() {
     const container = document.getElementById('dmImageContainer');
     if (dmImages.length === 0) {
-        container.innerHTML = '<p class="text-muted">Nessuna immagine selezionata</p>';
+        container.innerHTML = '<p class="text-muted small">Nessuna immagine</p>';
         return;
     }
     
@@ -609,7 +610,7 @@ function loadData() {
 }
 
 function resetSheet() {
-    if (confirm('Sei sicuro di voler resettare tutta la scheda? Questa azione non può essere annullata.')) {
+    if (confirm('Sei sicuro di voler resettare tutta la scheda? Questa azione non puo\' essere annullata.')) {
         location.reload();
     }
 }
@@ -705,7 +706,7 @@ function getAllData() {
     
     // Skills
     skills.forEach(skill => {
-        const skillId = skill.name.replace(/\s+/g, '_');
+        const skillId = skill.name.replace(/\s+/g, '_').replace(/'/g, '');
         data.skills[skill.name] = {
             proficient: document.getElementById(`prof_${skillId}`).checked ? 1 : 0,
             expertise: document.getElementById(`mastery_${skillId}`).checked ? 1 : 0
@@ -776,8 +777,25 @@ function getAllData() {
 function setAllData(data) {
     // Character Info
     if (data.character_info) {
+        const fieldMapping = {
+            name: 'charName',
+            class: 'charClass',
+            race: 'charRace',
+            level: 'charLevel',
+            age: 'charAge',
+            height: 'charHeight',
+            skin_tone: 'charSkin',
+            background: 'charBackground',
+            alignment: 'charAlignment',
+            xp: 'charXP',
+            weight: 'charWeight',
+            hair: 'charHair',
+            eyes: 'charEyes'
+        };
+        
         Object.keys(data.character_info).forEach(key => {
-            const element = document.getElementById('char' + key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ''));
+            const elementId = fieldMapping[key];
+            const element = document.getElementById(elementId);
             if (element) element.value = data.character_info[key] || '';
         });
     }
@@ -798,11 +816,11 @@ function setAllData(data) {
     if (data.combat) {
         if (data.combat.speed) document.getElementById('speed').value = data.combat.speed;
         if (data.combat.proficiency) document.getElementById('profBonus').value = data.combat.proficiency;
-        if (data.combat.hp_current) document.getElementById('hpCurrent').value = data.combat.hp_current;
-        if (data.combat.hp_max) document.getElementById('hpMax').value = data.combat.hp_max;
-        if (data.combat.hp_temp) document.getElementById('hpTemp').value = data.combat.hp_temp;
-        if (data.combat.ac) document.getElementById('ac').value = data.combat.ac;
-        if (data.combat.temp_ac) document.getElementById('tempAC').value = data.combat.temp_ac;
+        if (data.combat.hp_current !== undefined) document.getElementById('hpCurrent').value = data.combat.hp_current;
+        if (data.combat.hp_max !== undefined) document.getElementById('hpMax').value = data.combat.hp_max;
+        if (data.combat.hp_temp !== undefined) document.getElementById('hpTemp').value = data.combat.hp_temp;
+        if (data.combat.ac !== undefined) document.getElementById('ac').value = data.combat.ac;
+        if (data.combat.temp_ac !== undefined) document.getElementById('tempAC').value = data.combat.temp_ac;
         
         if (data.combat.hit_dice) {
             document.getElementById('diceCurrent').value = data.combat.hit_dice.current || 1;
@@ -837,7 +855,7 @@ function setAllData(data) {
     // Skills
     if (data.skills) {
         skills.forEach(skill => {
-            const skillId = skill.name.replace(/\s+/g, '_');
+            const skillId = skill.name.replace(/\s+/g, '_').replace(/'/g, '');
             if (data.skills[skill.name]) {
                 document.getElementById(`prof_${skillId}`).checked = data.skills[skill.name].proficient === 1;
                 document.getElementById(`mastery_${skillId}`).checked = data.skills[skill.name].expertise === 1;
@@ -846,7 +864,7 @@ function setAllData(data) {
     }
     
     // Equipment
-    if (data.equipment) {
+    if (data.equipment && data.equipment.length > 0) {
         const container = document.getElementById('equipmentContainer');
         container.innerHTML = '';
         data.equipment.forEach(item => {
@@ -878,7 +896,7 @@ function setAllData(data) {
         }
         
         if (data.spells.cantrips) {
-            if (data.spells.cantrips.known) {
+            if (data.spells.cantrips.known !== undefined) {
                 document.getElementById('cantripsKnown').value = data.spells.cantrips.known;
             }
             if (data.spells.cantrips.list) {
@@ -925,7 +943,7 @@ function setAllData(data) {
     // Scaling
     if (data.scaling) {
         Object.keys(data.scaling).forEach(skillName => {
-            const skillId = skillName.replace(/\s+/g, '_');
+            const skillId = skillName.replace(/\s+/g, '_').replace(/'/g, '');
             const select = document.getElementById(`scaling_${skillId}`);
             if (select) {
                 select.value = data.scaling[skillName];
@@ -942,10 +960,10 @@ function setAllData(data) {
         }
         
         if (data.dm_data.stats) {
-            document.getElementById('dmHP').value = data.dm_data.stats.hp || 0;
-            document.getElementById('dmAC').value = data.dm_data.stats.ac || 0;
-            document.getElementById('dmInitiative').value = data.dm_data.stats.initiative || '+0';
-            document.getElementById('dmProf').value = data.dm_data.stats.proficiency || 2;
+            if (data.dm_data.stats.hp !== undefined) document.getElementById('dmHP').value = data.dm_data.stats.hp;
+            if (data.dm_data.stats.ac !== undefined) document.getElementById('dmAC').value = data.dm_data.stats.ac;
+            if (data.dm_data.stats.initiative) document.getElementById('dmInitiative').value = data.dm_data.stats.initiative;
+            if (data.dm_data.stats.proficiency) document.getElementById('dmProf').value = data.dm_data.stats.proficiency;
             
             if (data.dm_data.stats.abilities) {
                 abilities.forEach(ab => {
