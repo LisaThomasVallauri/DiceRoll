@@ -200,6 +200,7 @@ function updateAllCalculations() {
     abilities.forEach(ability => updateModifier(ability));
     updateSaves();
     updateSkills();
+    updateDMInitiative();
 }
 
 // ==================== WEAPONS ====================
@@ -209,9 +210,9 @@ function initializeWeapons() {
         const row = document.createElement('div');
         row.className = 'weapon-row';
         row.innerHTML = `
-            <input type="text" class="form-control form-control-sm" placeholder="Arma" style="flex: 2;">
-            <input type="text" class="form-control form-control-sm" placeholder="+0" style="flex: 1;">
-            <input type="text" class="form-control form-control-sm" placeholder="1d6" style="flex: 1.5;">
+            <input type="text" class="form-control form-control-sm" placeholder="Arma">
+            <input type="text" class="form-control form-control-sm text-center" placeholder="+0">
+            <input type="text" class="form-control form-control-sm" placeholder="1d6">
         `;
         container.appendChild(row);
     }
@@ -219,20 +220,18 @@ function initializeWeapons() {
 
 // ==================== EQUIPMENT ====================
 function initializeEquipment() {
-    addEquipmentItem();
-}
-
-function addEquipmentItem() {
     const container = document.getElementById('equipmentContainer');
-    const row = document.createElement('div');
-    row.className = 'equipment-row';
-    row.innerHTML = `
-        <input type="text" class="form-control form-control-sm" placeholder="Oggetto">
-        <input type="number" class="form-control form-control-sm" placeholder="1" style="width: 60px;">
-        <input type="text" class="form-control form-control-sm" placeholder="Note">
-        <button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">X</button>
-    `;
-    container.appendChild(row);
+    // Create 150 fixed equipment slots
+    for (let i = 0; i < 150; i++) {
+        const row = document.createElement('div');
+        row.className = 'equipment-row';
+        row.innerHTML = `
+            <input type="text" class="form-control form-control-sm" placeholder="Oggetto ${i + 1}">
+            <input type="number" class="form-control form-control-sm text-center" placeholder="1">
+            <input type="text" class="form-control form-control-sm" placeholder="Note">
+        `;
+        container.appendChild(row);
+    }
 }
 
 // ==================== SPELLS ====================
@@ -342,6 +341,7 @@ function initializeDMAbilities() {
         // Add event listener
         document.getElementById(`dm_ability_${ability}`).addEventListener('input', function() {
             updateDMModifier(ability);
+            updateDMInitiative();
         });
     });
 }
@@ -351,6 +351,13 @@ function updateDMModifier(ability) {
     const modifier = Math.floor((score - 10) / 2);
     const modDisplay = document.getElementById(`dm_mod_${ability}`);
     modDisplay.textContent = modifier >= 0 ? `+${modifier}` : `${modifier}`;
+}
+
+function updateDMInitiative() {
+    const dexScore = parseInt(document.getElementById('dm_ability_DES').value) || 10;
+    const dexMod = Math.floor((dexScore - 10) / 2);
+    const initiative = dexMod >= 0 ? `+${dexMod}` : `${dexMod}`;
+    document.getElementById('dmInitiative').textContent = initiative;
 }
 
 // ==================== DICE ROLLING ====================
@@ -689,7 +696,6 @@ function getAllData() {
             stats: {
                 hp: document.getElementById('dmHP').value,
                 ac: document.getElementById('dmAC').value,
-                initiative: document.getElementById('dmInitiative').value,
                 proficiency: document.getElementById('dmProf').value,
                 abilities: {}
             },
@@ -725,16 +731,14 @@ function getAllData() {
         }
     });
     
-    // Equipment
+    // Equipment - Save all 150 slots
     document.querySelectorAll('#equipmentContainer .equipment-row').forEach(row => {
         const inputs = row.querySelectorAll('input');
-        if (inputs[0].value || inputs[1].value || inputs[2].value) {
-            data.equipment.push({
-                item: inputs[0].value,
-                quantity: inputs[1].value,
-                usage: inputs[2].value
-            });
-        }
+        data.equipment.push({
+            item: inputs[0].value || '',
+            quantity: inputs[1].value || '',
+            usage: inputs[2].value || ''
+        });
     });
     
     // Cantrips
@@ -796,17 +800,19 @@ function setAllData(data) {
         Object.keys(data.character_info).forEach(key => {
             const elementId = fieldMapping[key];
             const element = document.getElementById(elementId);
-            if (element) element.value = data.character_info[key] || '';
+            if (element && data.character_info[key] !== undefined) {
+                element.value = data.character_info[key];
+            }
         });
     }
     
     // Abilities
     if (data.abilities) {
         abilities.forEach(ab => {
-            if (data.abilities.scores && data.abilities.scores[ab]) {
+            if (data.abilities.scores && data.abilities.scores[ab] !== undefined) {
                 document.getElementById(`ability_${ab}`).value = data.abilities.scores[ab];
             }
-            if (data.abilities.saving_throws) {
+            if (data.abilities.saving_throws && data.abilities.saving_throws[ab] !== undefined) {
                 document.getElementById(`save_prof_${ab}`).checked = data.abilities.saving_throws[ab] === 1;
             }
         });
@@ -814,8 +820,8 @@ function setAllData(data) {
     
     // Combat
     if (data.combat) {
-        if (data.combat.speed) document.getElementById('speed').value = data.combat.speed;
-        if (data.combat.proficiency) document.getElementById('profBonus').value = data.combat.proficiency;
+        if (data.combat.speed !== undefined) document.getElementById('speed').value = data.combat.speed;
+        if (data.combat.proficiency !== undefined) document.getElementById('profBonus').value = data.combat.proficiency;
         if (data.combat.hp_current !== undefined) document.getElementById('hpCurrent').value = data.combat.hp_current;
         if (data.combat.hp_max !== undefined) document.getElementById('hpMax').value = data.combat.hp_max;
         if (data.combat.hp_temp !== undefined) document.getElementById('hpTemp').value = data.combat.hp_temp;
@@ -823,20 +829,24 @@ function setAllData(data) {
         if (data.combat.temp_ac !== undefined) document.getElementById('tempAC').value = data.combat.temp_ac;
         
         if (data.combat.hit_dice) {
-            document.getElementById('diceCurrent').value = data.combat.hit_dice.current || 1;
-            document.getElementById('diceMax').value = data.combat.hit_dice.max || 1;
-            document.getElementById('diceType').value = data.combat.hit_dice.type || 'd8';
+            if (data.combat.hit_dice.current !== undefined) document.getElementById('diceCurrent').value = data.combat.hit_dice.current;
+            if (data.combat.hit_dice.max !== undefined) document.getElementById('diceMax').value = data.combat.hit_dice.max;
+            if (data.combat.hit_dice.type !== undefined) document.getElementById('diceType').value = data.combat.hit_dice.type;
         }
         
         if (data.combat.death_saves) {
             const successBoxes = document.querySelectorAll('.death-save-success');
             const failureBoxes = document.querySelectorAll('.death-save-failure');
-            data.combat.death_saves.success.forEach((val, i) => {
-                if (successBoxes[i]) successBoxes[i].checked = val === 1;
-            });
-            data.combat.death_saves.failure.forEach((val, i) => {
-                if (failureBoxes[i]) failureBoxes[i].checked = val === 1;
-            });
+            if (data.combat.death_saves.success) {
+                data.combat.death_saves.success.forEach((val, i) => {
+                    if (successBoxes[i]) successBoxes[i].checked = val === 1;
+                });
+            }
+            if (data.combat.death_saves.failure) {
+                data.combat.death_saves.failure.forEach((val, i) => {
+                    if (failureBoxes[i]) failureBoxes[i].checked = val === 1;
+                });
+            }
         }
         
         if (data.combat.weapons) {
@@ -857,23 +867,26 @@ function setAllData(data) {
         skills.forEach(skill => {
             const skillId = skill.name.replace(/\s+/g, '_').replace(/'/g, '');
             if (data.skills[skill.name]) {
-                document.getElementById(`prof_${skillId}`).checked = data.skills[skill.name].proficient === 1;
-                document.getElementById(`mastery_${skillId}`).checked = data.skills[skill.name].expertise === 1;
+                if (data.skills[skill.name].proficient !== undefined) {
+                    document.getElementById(`prof_${skillId}`).checked = data.skills[skill.name].proficient === 1;
+                }
+                if (data.skills[skill.name].expertise !== undefined) {
+                    document.getElementById(`mastery_${skillId}`).checked = data.skills[skill.name].expertise === 1;
+                }
             }
         });
     }
     
-    // Equipment
-    if (data.equipment && data.equipment.length > 0) {
-        const container = document.getElementById('equipmentContainer');
-        container.innerHTML = '';
-        data.equipment.forEach(item => {
-            addEquipmentItem();
-            const row = container.lastElementChild;
-            const inputs = row.querySelectorAll('input');
-            inputs[0].value = item.item || '';
-            inputs[1].value = item.quantity || '';
-            inputs[2].value = item.usage || '';
+    // Equipment - Load all 150 slots
+    if (data.equipment) {
+        const equipmentRows = document.querySelectorAll('#equipmentContainer .equipment-row');
+        data.equipment.forEach((item, i) => {
+            if (equipmentRows[i]) {
+                const inputs = equipmentRows[i].querySelectorAll('input');
+                inputs[0].value = item.item || '';
+                inputs[1].value = item.quantity || '';
+                inputs[2].value = item.usage || '';
+            }
         });
     }
     
@@ -881,18 +894,20 @@ function setAllData(data) {
     if (data.coins) {
         Object.keys(data.coins).forEach(coin => {
             const element = document.getElementById('coin' + coin);
-            if (element) element.value = data.coins[coin] || 0;
+            if (element && data.coins[coin] !== undefined) {
+                element.value = data.coins[coin];
+            }
         });
     }
     
     // Spells
     if (data.spells) {
         if (data.spells.spellcasting) {
-            document.getElementById('spellAbility').value = data.spells.spellcasting.ability || '';
-            document.getElementById('spellSaveDC').value = data.spells.spellcasting.save_dc || '+0';
-            document.getElementById('spellAttackBonus').value = data.spells.spellcasting.attack_bonus || '+0';
-            document.getElementById('spellsKnown').value = data.spells.spellcasting.spells_known || 0;
-            document.getElementById('spellsPrepared').value = data.spells.spellcasting.spells_prepared || 0;
+            if (data.spells.spellcasting.ability !== undefined) document.getElementById('spellAbility').value = data.spells.spellcasting.ability;
+            if (data.spells.spellcasting.save_dc !== undefined) document.getElementById('spellSaveDC').value = data.spells.spellcasting.save_dc;
+            if (data.spells.spellcasting.attack_bonus !== undefined) document.getElementById('spellAttackBonus').value = data.spells.spellcasting.attack_bonus;
+            if (data.spells.spellcasting.spells_known !== undefined) document.getElementById('spellsKnown').value = data.spells.spellcasting.spells_known;
+            if (data.spells.spellcasting.spells_prepared !== undefined) document.getElementById('spellsPrepared').value = data.spells.spellcasting.spells_prepared;
         }
         
         if (data.spells.cantrips) {
@@ -909,8 +924,12 @@ function setAllData(data) {
         
         if (data.spells.slots) {
             data.spells.slots.forEach(slot => {
-                document.getElementById(`slotAvail${slot.level}`).value = slot.available || 0;
-                document.getElementById(`slotMax${slot.level}`).value = slot.max || 0;
+                if (slot.level !== undefined && slot.available !== undefined) {
+                    document.getElementById(`slotAvail${slot.level}`).value = slot.available;
+                }
+                if (slot.level !== undefined && slot.max !== undefined) {
+                    document.getElementById(`slotMax${slot.level}`).value = slot.max;
+                }
             });
         }
         
@@ -932,10 +951,10 @@ function setAllData(data) {
     
     // Text Areas
     if (data.text_areas) {
-        if (data.text_areas.features_traits) {
+        if (data.text_areas.features_traits !== undefined) {
             document.getElementById('featuresTraits').value = data.text_areas.features_traits;
         }
-        if (data.text_areas.player_notes) {
+        if (data.text_areas.player_notes !== undefined) {
             document.getElementById('playerNotes').value = data.text_areas.player_notes;
         }
     }
@@ -945,7 +964,7 @@ function setAllData(data) {
         Object.keys(data.scaling).forEach(skillName => {
             const skillId = skillName.replace(/\s+/g, '_').replace(/'/g, '');
             const select = document.getElementById(`scaling_${skillId}`);
-            if (select) {
+            if (select && data.scaling[skillName] !== undefined) {
                 select.value = data.scaling[skillName];
                 skillScaling[skillName] = data.scaling[skillName];
                 updateSkillLabel(skillName);
@@ -955,20 +974,19 @@ function setAllData(data) {
     
     // DM Data
     if (data.dm_data) {
-        if (data.dm_data.notes) {
+        if (data.dm_data.notes !== undefined) {
             document.getElementById('dmNotes').value = data.dm_data.notes;
         }
         
         if (data.dm_data.stats) {
             if (data.dm_data.stats.hp !== undefined) document.getElementById('dmHP').value = data.dm_data.stats.hp;
             if (data.dm_data.stats.ac !== undefined) document.getElementById('dmAC').value = data.dm_data.stats.ac;
-            if (data.dm_data.stats.initiative) document.getElementById('dmInitiative').value = data.dm_data.stats.initiative;
-            if (data.dm_data.stats.proficiency) document.getElementById('dmProf').value = data.dm_data.stats.proficiency;
+            if (data.dm_data.stats.proficiency !== undefined) document.getElementById('dmProf').value = data.dm_data.stats.proficiency;
             
             if (data.dm_data.stats.abilities) {
                 abilities.forEach(ab => {
                     const element = document.getElementById(`dm_ability_${ab}`);
-                    if (element && data.dm_data.stats.abilities[ab]) {
+                    if (element && data.dm_data.stats.abilities[ab] !== undefined) {
                         element.value = data.dm_data.stats.abilities[ab];
                         updateDMModifier(ab);
                     }

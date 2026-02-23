@@ -9,86 +9,94 @@
 </head>
 <body>
     <div class="container-fluid p-3">
-        <!-- Tabs Navigation -->
-        <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="sheet-tab" data-bs-toggle="tab" data-bs-target="#sheet" type="button">SCHEDA PERSONAGGIO</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="equip-tab" data-bs-toggle="tab" data-bs-target="#equip" type="button">EQUIPAGGIAMENTO</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="spells-tab" data-bs-toggle="tab" data-bs-target="#spells" type="button">INCANTESIMI</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="scaling-tab" data-bs-toggle="tab" data-bs-target="#scaling" type="button">SCALING ABILITA'</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="dm-tab" data-bs-toggle="tab" data-bs-target="#dm" type="button">DUNGEON MASTER</button>
-            </li>
-        </ul>
+        <!-- Tabs Navigation with Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <ul class="nav nav-tabs flex-grow-1" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="sheet-tab" data-bs-toggle="tab" data-bs-target="#sheet" type="button">SCHEDA PERSONAGGIO</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="equip-tab" data-bs-toggle="tab" data-bs-target="#equip" type="button">EQUIPAGGIAMENTO</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="spells-tab" data-bs-toggle="tab" data-bs-target="#spells" type="button">INCANTESIMI</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="scaling-tab" data-bs-toggle="tab" data-bs-target="#scaling" type="button">SCALING ABILITA'</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="dm-tab" data-bs-toggle="tab" data-bs-target="#dm" type="button">DUNGEON MASTER</button>
+                </li>
+            </ul>
+            <div class="ms-3 d-flex gap-2">
+                <button class="btn btn-danger btn-sm" onclick="resetSheet()">Reset</button>
+                <button class="btn btn-info btn-sm" onclick="loadData()">Carica</button>
+                <button class="btn btn-success btn-sm" onclick="saveData()">Salva</button>
+                <button class="btn btn-success btn-sm" onclick="saveDataAs()">Salva Nome</button>
+            </div>
+        </div>
 
         <!-- Tab Content -->
         <div class="tab-content" id="mainTabContent">
             <!-- SCHEDA PERSONAGGIO -->
             <div class="tab-pane fade show active" id="sheet" role="tabpanel">
-                <!-- Character Info -->
-                <div class="card mb-3">
+                <!-- Character Info - More Compact -->
+                <div class="card mb-2">
                     <div class="card-header">INFORMAZIONI PERSONAGGIO</div>
-                    <div class="card-body">
-                        <div class="row g-2 mb-2">
+                    <div class="card-body p-2">
+                        <div class="row g-2 mb-1">
                             <div class="col-md-3">
-                                <label class="form-label small fw-bold">Nome Personaggio</label>
+                                <label class="form-label-compact">Nome Personaggio</label>
                                 <input type="text" class="form-control form-control-sm" id="charName">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-bold">Classe</label>
+                                <label class="form-label-compact">Classe</label>
                                 <input type="text" class="form-control form-control-sm" id="charClass">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-bold">Razza</label>
+                                <label class="form-label-compact">Razza</label>
                                 <input type="text" class="form-control form-control-sm" id="charRace">
                             </div>
                             <div class="col-md-1">
-                                <label class="form-label small fw-bold">Livello</label>
+                                <label class="form-label-compact">Liv</label>
                                 <input type="number" class="form-control form-control-sm" id="charLevel" value="1">
                             </div>
                             <div class="col-md-1">
-                                <label class="form-label small fw-bold">Eta'</label>
+                                <label class="form-label-compact">Eta'</label>
                                 <input type="text" class="form-control form-control-sm" id="charAge">
                             </div>
                             <div class="col-md-1">
-                                <label class="form-label small fw-bold">Altezza</label>
+                                <label class="form-label-compact">Alt.</label>
                                 <input type="text" class="form-control form-control-sm" id="charHeight">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-bold">Carnagione</label>
+                                <label class="form-label-compact">Carnagione</label>
                                 <input type="text" class="form-control form-control-sm" id="charSkin">
                             </div>
                         </div>
                         <div class="row g-2">
-                            <div class="col-md-3">
-                                <label class="form-label small fw-bold">Background</label>
+                            <div class="col-md-2">
+                                <label class="form-label-compact">Background</label>
                                 <input type="text" class="form-control form-control-sm" id="charBackground">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-bold">Allineamento</label>
+                                <label class="form-label-compact">Allineamento</label>
                                 <input type="text" class="form-control form-control-sm" id="charAlignment">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-bold">Punti Esperienza</label>
+                                <label class="form-label-compact">Esperienza</label>
                                 <input type="number" class="form-control form-control-sm" id="charXP" value="0">
                             </div>
-                            <div class="col-md-1">
-                                <label class="form-label small fw-bold">Peso</label>
+                            <div class="col-md-2">
+                                <label class="form-label-compact">Peso</label>
                                 <input type="text" class="form-control form-control-sm" id="charWeight">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-bold">Capelli</label>
+                                <label class="form-label-compact">Capelli</label>
                                 <input type="text" class="form-control form-control-sm" id="charHair">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-bold">Occhi</label>
+                                <label class="form-label-compact">Occhi</label>
                                 <input type="text" class="form-control form-control-sm" id="charEyes">
                             </div>
                         </div>
@@ -105,10 +113,35 @@
                                 <div id="abilitiesContainer"></div>
                             </div>
                         </div>
-                        <div class="card">
+                        <div class="card mb-2">
                             <div class="card-header">TIRI SALVEZZA</div>
                             <div class="card-body p-2">
                                 <div id="savesContainer"></div>
+                            </div>
+                        </div>
+                        <!-- Combat Stats Inline -->
+                        <div class="card">
+                            <div class="card-body p-2">
+                                <div class="row g-2 mb-1">
+                                    <div class="col-6">
+                                        <label class="form-label-compact mb-0">Iniziativa</label>
+                                        <div class="stat-display-small" id="initiative">+0</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label-compact mb-0">Percez. Pass.</label>
+                                        <div class="stat-display-small" id="passivePerception">10</div>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-1">
+                                    <div class="col-6">
+                                        <label class="form-label-compact mb-0">Velocita'</label>
+                                        <input type="text" class="form-control form-control-sm text-center" id="speed" value="30">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label-compact mb-0">Competenza</label>
+                                        <input type="text" class="form-control form-control-sm text-center" id="profBonus" value="2">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -118,11 +151,13 @@
                         <div class="card">
                             <div class="card-header">ABILITA'</div>
                             <div class="card-body p-2">
-                                <div class="skills-header row g-1 mb-1 small fw-bold">
-                                    <div class="col-6">Nome</div>
-                                    <div class="col-2 text-center">Mod</div>
-                                    <div class="col-2 text-center">C</div>
-                                    <div class="col-2 text-center">M</div>
+                                <div class="skills-header mb-1">
+                                    <div class="skill-row-header">
+                                        <span class="skill-name-header">Nome</span>
+                                        <span class="skill-mod-header">Mod</span>
+                                        <span class="skill-check-header">C</span>
+                                        <span class="skill-check-header">M</span>
+                                    </div>
                                 </div>
                                 <div id="skillsContainer"></div>
                             </div>
@@ -131,38 +166,20 @@
 
                     <!-- Combat Column -->
                     <div class="col-lg-4">
-                        <div class="row g-2 mb-2">
-                            <div class="col-3">
-                                <label class="form-label small fw-bold">Iniziativa</label>
-                                <div class="stat-display" id="initiative">+0</div>
-                            </div>
-                            <div class="col-3">
-                                <label class="form-label small fw-bold">Velocita'</label>
-                                <input type="text" class="form-control form-control-sm text-center" id="speed" value="30">
-                            </div>
-                            <div class="col-3">
-                                <label class="form-label small fw-bold">Competenza</label>
-                                <input type="text" class="form-control form-control-sm text-center" id="profBonus" value="2">
-                            </div>
-                            <div class="col-3">
-                                <label class="form-label small fw-bold">Percez. Pass.</label>
-                                <div class="stat-display" id="passivePerception">10</div>
-                            </div>
-                        </div>
                         <div class="card mb-2">
                             <div class="card-header bg-danger text-white">PUNTI FERITA</div>
                             <div class="card-body p-2">
                                 <div class="row g-2">
                                     <div class="col-4">
-                                        <label class="form-label small">Attuali</label>
+                                        <label class="form-label-compact mb-1">Attuali</label>
                                         <input type="number" class="form-control form-control-sm text-center" id="hpCurrent" value="10">
                                     </div>
                                     <div class="col-4">
-                                        <label class="form-label small">Massimi</label>
+                                        <label class="form-label-compact mb-1">Massimi</label>
                                         <input type="number" class="form-control form-control-sm text-center" id="hpMax" value="10">
                                     </div>
                                     <div class="col-4">
-                                        <label class="form-label small">Temp</label>
+                                        <label class="form-label-compact mb-1">Temp</label>
                                         <input type="number" class="form-control form-control-sm text-center" id="hpTemp" value="0">
                                     </div>
                                 </div>
@@ -170,29 +187,29 @@
                         </div>
                         <div class="row g-2 mb-2">
                             <div class="col-4">
-                                <label class="form-label small fw-bold">CA</label>
+                                <label class="form-label-compact mb-1">CA</label>
                                 <input type="number" class="form-control form-control-sm text-center" id="ac" value="10">
                             </div>
                             <div class="col-4">
-                                <label class="form-label small fw-bold">CA Temp</label>
+                                <label class="form-label-compact mb-1">CA Temp</label>
                                 <input type="number" class="form-control form-control-sm text-center" id="tempAC" value="0">
                             </div>
                             <div class="col-4">
-                                <label class="form-label small fw-bold">Dadi Vita</label>
-                                <div class="input-group input-group-sm">
-                                    <input type="number" class="form-control text-center" id="diceCurrent" value="1" style="max-width:50px;">
-                                    <span class="input-group-text">/</span>
-                                    <input type="number" class="form-control text-center" id="diceMax" value="1" style="max-width:50px;">
-                                    <input type="text" class="form-control text-center" id="diceType" value="d8" style="max-width:40px;">
+                                <label class="form-label-compact mb-1">Dadi Vita</label>
+                                <div class="hit-dice-group">
+                                    <input type="number" class="form-control form-control-sm text-center" id="diceCurrent" value="1">
+                                    <span class="hit-dice-separator">/</span>
+                                    <input type="number" class="form-control form-control-sm text-center" id="diceMax" value="1">
+                                    <input type="text" class="form-control form-control-sm text-center" id="diceType" value="d8">
                                 </div>
                             </div>
                         </div>
                         <div class="card mb-2">
                             <div class="card-body p-2">
-                                <h6 class="mb-2" id="titleSect">TS CONTRO MORTE</h6>
+                                <h6 class="mb-2 card-subtitle">TS CONTRO MORTE</h6>
                                 <div class="row">
                                     <div class="col-6">
-                                        <label class="form-label small text-success fw-bold">SUCCESSI</label>
+                                        <label class="form-label-compact text-success fw-bold mb-1">SUCCESSI</label>
                                         <div class="d-flex gap-1">
                                             <input type="checkbox" class="death-save-success">
                                             <input type="checkbox" class="death-save-success">
@@ -200,7 +217,7 @@
                                         </div>
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label small text-danger fw-bold">FALLIMENTI</label>
+                                        <label class="form-label-compact text-danger fw-bold mb-1">FALLIMENTI</label>
                                         <div class="d-flex gap-1">
                                             <input type="checkbox" class="death-save-failure">
                                             <input type="checkbox" class="death-save-failure">
@@ -212,11 +229,11 @@
                         </div>
                         <div class="card">
                             <div class="card-body p-2">
-                                <h6 class="mb-2" id="titleSect">ARMI</h6>
-                                <div class="weapons-header row g-1 mb-1 small fw-bold">
-                                    <div class="col-5">Arma</div>
-                                    <div class="col-3 text-center">Bonus</div>
-                                    <div class="col-4">Danno</div>
+                                <h6 class="mb-2 card-subtitle">ARMI</h6>
+                                <div class="weapons-header-grid mb-1">
+                                    <span class="fw-bold small">Arma</span>
+                                    <span class="fw-bold small text-center">Bonus</span>
+                                    <span class="fw-bold small">Danno</span>
                                 </div>
                                 <div id="weaponsContainer" class="weapons-list"></div>
                             </div>
@@ -242,71 +259,62 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Save/Load Buttons -->
-                <div class="text-end mt-3">
-                    <button class="btn btn-danger btn-sm" onclick="resetSheet()">Reset</button>
-                    <button class="btn btn-info btn-sm" onclick="loadData()">Carica</button>
-                    <button class="btn btn-success btn-sm" onclick="saveData()">Salva</button>
-                    <button class="btn btn-success btn-sm" onclick="saveDataAs()">Salva con nome</button>
-                </div>
             </div>
 
             <!-- EQUIPAGGIAMENTO E APPUNTI -->
             <div class="tab-pane fade" id="equip" role="tabpanel">
-                <div class="row g-3">
-                    <div class="col-lg-6">
-                        <div class="card mb-3">
-                            <div class="card-header">EQUIPAGGIAMENTO</div>
-                            <div class="card-body">
-                                <div class="mb-2">
-                                    <button class="btn btn-sm btn-primary" onclick="addEquipmentItem()">Aggiungi Oggetto</button>
-                                </div>
-                                <div class="equipment-list" id="equipmentContainer"></div>
+                <!-- Coins at the very top -->
+                <div class="card mb-2">
+                    <div class="card-header">MONETE</div>
+                    <div class="card-body p-2">
+                        <div class="row g-2">
+                            <div class="col">
+                                <label class="form-label-compact mb-1">MR</label>
+                                <input type="number" class="form-control form-control-sm" id="coinMR" value="0">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact mb-1">MA</label>
+                                <input type="number" class="form-control form-control-sm" id="coinMA" value="0">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact mb-1">ME</label>
+                                <input type="number" class="form-control form-control-sm" id="coinME" value="0">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact mb-1">MO</label>
+                                <input type="number" class="form-control form-control-sm" id="coinMO" value="0">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact mb-1">MP</label>
+                                <input type="number" class="form-control form-control-sm" id="coinMP" value="0">
                             </div>
                         </div>
-                        
+                    </div>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-lg-6">
+                        <!-- Fixed Equipment List -->
                         <div class="card">
-                            <div class="card-header">MONETE</div>
-                            <div class="card-body">
-                                <div class="row g-2">
-                                    <div class="col">
-                                        <label class="form-label small fw-bold">MR</label>
-                                        <input type="number" class="form-control form-control-sm" id="coinMR" value="0">
-                                    </div>
-                                    <div class="col">
-                                        <label class="form-label small fw-bold">MA</label>
-                                        <input type="number" class="form-control form-control-sm" id="coinMA" value="0">
-                                    </div>
-                                    <div class="col">
-                                        <label class="form-label small fw-bold">ME</label>
-                                        <input type="number" class="form-control form-control-sm" id="coinME" value="0">
-                                    </div>
-                                    <div class="col">
-                                        <label class="form-label small fw-bold">MO</label>
-                                        <input type="number" class="form-control form-control-sm" id="coinMO" value="0">
-                                    </div>
-                                    <div class="col">
-                                        <label class="form-label small fw-bold">MP</label>
-                                        <input type="number" class="form-control form-control-sm" id="coinMP" value="0">
-                                    </div>
-                                </div>
+                            <div class="card-header">EQUIPAGGIAMENTO (150 SLOT)</div>
+                            <div class="card-body p-2">
+                                <div class="equipment-list-scrollable" id="equipmentContainer"></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-lg-6">
-                        <div class="card mb-3">
+                        <div class="card mb-2">
                             <div class="card-header">TRATTI & CARATTERISTICHE</div>
-                            <div class="card-body">
-                                <textarea class="form-control" id="featuresTraits" rows="10" placeholder="Inserisci tratti, privilegi di classe, background..."></textarea>
+                            <div class="card-body p-2">
+                                <textarea class="form-control notes-textarea" id="featuresTraits" placeholder="Inserisci tratti, privilegi di classe, background..."></textarea>
                             </div>
                         </div>
                         
                         <div class="card">
                             <div class="card-header">APPUNTI GIOCATORE</div>
-                            <div class="card-body">
-                                <textarea class="form-control" id="playerNotes" rows="10" placeholder="Appunti personali..."></textarea>
+                            <div class="card-body p-2">
+                                <textarea class="form-control notes-textarea" id="playerNotes" placeholder="Appunti personali..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -315,14 +323,14 @@
 
             <!-- INCANTESIMI -->
             <div class="tab-pane fade" id="spells" role="tabpanel">
-                <div class="row g-3">
+                <div class="row g-2">
                     <div class="col-lg-9">
                         <div class="card mb-2">
                             <div class="card-header">CAPACITA' INCANTESIMI</div>
                             <div class="card-body p-2">
                                 <div class="row g-2">
                                     <div class="col-md-2">
-                                        <label class="form-label small fw-bold">Caratteristica</label>
+                                        <label class="form-label-compact mb-1">Caratteristica</label>
                                         <select class="form-select form-select-sm" id="spellAbility">
                                             <option value="">-</option>
                                             <option value="FOR">FOR</option>
@@ -334,23 +342,23 @@
                                         </select>
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="form-label small fw-bold">CD</label>
+                                        <label class="form-label-compact mb-1">CD</label>
                                         <input type="text" class="form-control form-control-sm" id="spellSaveDC" value="+0">
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="form-label small fw-bold">Bonus Att.</label>
+                                        <label class="form-label-compact mb-1">Bonus Att.</label>
                                         <input type="text" class="form-control form-control-sm" id="spellAttackBonus" value="+0">
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="form-label small fw-bold">Conosciuti</label>
+                                        <label class="form-label-compact mb-1">Conosciuti</label>
                                         <input type="number" class="form-control form-control-sm" id="spellsKnown" value="0">
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="form-label small fw-bold">Preparati</label>
+                                        <label class="form-label-compact mb-1">Preparati</label>
                                         <input type="number" class="form-control form-control-sm" id="spellsPrepared" value="0">
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="form-label small fw-bold">Trucchetti</label>
+                                        <label class="form-label-compact mb-1">Trucchetti</label>
                                         <input type="number" class="form-control form-control-sm" id="cantripsKnown" value="0">
                                     </div>
                                 </div>
@@ -384,7 +392,7 @@
             <div class="tab-pane fade" id="scaling" role="tabpanel">
                 <div class="card">
                     <div class="card-header">SCALING ABILITA'</div>
-                    <div class="card-body">
+                    <div class="card-body p-2">
                         <p class="text-muted small">Personalizza quale caratteristica usa ogni abilita' per il calcolo.</p>
                         <div id="scalingContainer" class="row g-2"></div>
                     </div>
@@ -393,44 +401,60 @@
 
             <!-- DUNGEON MASTER -->
             <div class="tab-pane fade" id="dm" role="tabpanel">
-                <div class="row g-3">
+                <div class="row g-2">
+                    <!-- Left Column: Stats + Dice -->
                     <div class="col-lg-6">
-                        <div class="card mb-3">
+                        <div class="card mb-2">
                             <div class="card-header">STATISTICHE NPC</div>
-                            <div class="card-body">
-                                <div class="row g-2 mb-3">
+                            <div class="card-body p-2">
+                                <div class="row g-2 mb-2">
                                     <div class="col-3">
-                                        <label class="form-label small fw-bold">HP</label>
+                                        <label class="form-label-compact mb-1">HP</label>
                                         <input type="number" class="form-control form-control-sm" id="dmHP" value="0">
                                     </div>
                                     <div class="col-3">
-                                        <label class="form-label small fw-bold">CA</label>
+                                        <label class="form-label-compact mb-1">CA</label>
                                         <input type="number" class="form-control form-control-sm" id="dmAC" value="0">
                                     </div>
                                     <div class="col-3">
-                                        <label class="form-label small fw-bold">Iniziativa</label>
-                                        <input type="text" class="form-control form-control-sm" id="dmInitiative" value="+0">
+                                        <label class="form-label-compact mb-1">Iniziativa</label>
+                                        <div class="stat-display-small" id="dmInitiative">+0</div>
                                     </div>
                                     <div class="col-3">
-                                        <label class="form-label small fw-bold">Comp.</label>
-                                        <input type="text" class="form-control form-control-sm" id="dmProf" value="2">
+                                        <label class="form-label-compact mb-1">Comp.</label>
+                                        <input type="number" class="form-control form-control-sm" id="dmProf" value="2">
                                     </div>
                                 </div>
-                                <h6 class="mb-2">Caratteristiche</h6>
+                                <h6 class="mb-2 small card-subtitle">Caratteristiche</h6>
                                 <div id="dmAbilitiesContainer" class="row g-2"></div>
                             </div>
                         </div>
 
                         <div class="card">
-                            <div class="card-header">APPUNTI DM</div>
-                            <div class="card-body">
-                                <textarea class="form-control" id="dmNotes" rows="8" placeholder="Appunti del Dungeon Master..."></textarea>
+                            <div class="card-header">COMANDI DADI</div>
+                            <div class="card-body p-2">
+                                <div class="input-group input-group-sm mb-2">
+                                    <input type="text" class="form-control" id="diceCommand" placeholder="es: 2d6+4">
+                                    <button class="btn btn-primary" onclick="rollDice()">Tira</button>
+                                </div>
+                                <div class="btn-group mb-2 w-100 btn-group-sm" role="group">
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d4')">d4</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d6')">d6</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d8')">d8</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d10')">d10</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d12')">d12</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d20')">d20</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d100')">d100</button>
+                                </div>
+                                <button class="btn btn-sm btn-light w-100 mb-2" onclick="showDiceHelp()">Sintassi Dadi</button>
+                                <div class="dice-log" id="diceLog"></div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Right Column: Images + Notes -->
                     <div class="col-lg-6">
-                        <div class="card mb-3">
+                        <div class="card mb-2">
                             <div class="card-header">GALLERIA IMMAGINI <span id="dmImageCounter">(0/0)</span></div>
                             <div class="card-body p-2">
                                 <div class="btn-group mb-2 w-100 btn-group-sm">
@@ -447,23 +471,9 @@
                         </div>
 
                         <div class="card">
-                            <div class="card-header">COMANDI DADI</div>
-                            <div class="card-body">
-                                <div class="input-group mb-2">
-                                    <input type="text" class="form-control form-control-sm" id="diceCommand" placeholder="es: 2d6+4">
-                                    <button class="btn btn-primary btn-sm" onclick="rollDice()">Tira</button>
-                                </div>
-                                <div class="btn-group mb-2 w-100 btn-group-sm" role="group">
-                                    <button class="btn btn-outline-light" onclick="quickRoll('1d4')">d4</button>
-                                    <button class="btn btn-outline-light" onclick="quickRoll('1d6')">d6</button>
-                                    <button class="btn btn-outline-light" onclick="quickRoll('1d8')">d8</button>
-                                    <button class="btn btn-outline-light" onclick="quickRoll('1d10')">d10</button>
-                                    <button class="btn btn-outline-light" onclick="quickRoll('1d12')">d12</button>
-                                    <button class="btn btn-outline-light" onclick="quickRoll('1d20')">d20</button>
-                                    <button class="btn btn-outline-light" onclick="quickRoll('1d100')">d100</button>
-                                </div>
-                                <button class="btn btn-sm btn-light w-100 mb-2" onclick="showDiceHelp()">Sintassi Dadi</button>
-                                <div class="dice-log" id="diceLog"></div>
+                            <div class="card-header">APPUNTI DM</div>
+                            <div class="card-body p-2">
+                                <textarea class="form-control notes-textarea" id="dmNotes" placeholder="Appunti del Dungeon Master..."></textarea>
                             </div>
                         </div>
                     </div>

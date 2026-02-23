@@ -7,16 +7,16 @@
 }
 
 body {
-    background: #1a1a1a;
+    background: #0d0d0d;
     color: #e0e0e0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .container-fluid {
     max-width: 1920px;
     margin: 0 auto;
-    background: #1a1a1a;
+    background: #0d0d0d;
 }
 
 /* Tabs */
@@ -26,100 +26,120 @@ body {
 
 .nav-tabs .nav-link {
     color: #b0b0b0;
-    background: #252525;
+    background: #1a1a1a;
     border: 1px solid #2d2d2d;
     margin-right: 3px;
     font-weight: bold;
-    font-size: 13px;
-    padding: 8px 16px;
+    font-size: 12px;
+    padding: 6px 14px;
     border-radius: 5px 5px 0 0;
     transition: all 0.2s;
 }
 
 .nav-tabs .nav-link:hover {
-    background: #2d2d2d;
+    background: #252525;
     color: #fff;
 }
 
 .nav-tabs .nav-link.active {
-    background: #2d2d2d;
+    background: #252525;
     color: #fff;
     border-bottom: 2px solid #4a9eff;
 }
 
 /* Cards */
 .card {
-    background: #252525;
-    border: 1px solid #3d3d3d;
-    border-radius: 6px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
 }
 
 .card-header {
-    background: #2d2d2d;
+    background: #252525;
     color: #fff;
     font-weight: bold;
-    font-size: 13px;
-    padding: 8px 12px;
-    border-bottom: 1px solid #3d3d3d;
-    border-radius: 6px 6px 0 0;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-bottom: 1px solid #333;
+    border-radius: 5px 5px 0 0;
 }
 
 .card-body {
-    padding: 10px;
+    padding: 8px;
 }
 
 .card-header.bg-danger {
-    background: #8b2e2e !important;
+    background: #7a2424 !important;
+}
+
+.card-subtitle {
+    color: #c0c0c0;
+    font-size: 12px;
 }
 
 /* Form Elements */
 .form-control,
 .form-select {
-    background: #1a1a1a;
-    border: 1px solid #3d3d3d;
+    background: #0d0d0d;
+    border: 1px solid #333;
     color: #e0e0e0;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .form-control:focus,
 .form-select:focus {
-    background: #1f1f1f;
+    background: #151515;
     border-color: #4a9eff;
     color: #fff;
-    box-shadow: 0 0 0 0.2rem rgba(74, 158, 255, 0.25);
+    box-shadow: 0 0 0 0.15rem rgba(74, 158, 255, 0.2);
 }
 
 .form-control::placeholder {
-    color: #666;
+    color: #555;
 }
 
 textarea.form-control {
-    min-height: 150px;
+    min-height: 120px;
     resize: vertical;
 }
 
 .form-label {
-    color: #b0b0b0;
-    margin-bottom: 4px;
-    font-size: 12px;
+    color: #c0c0c0;
+    margin-bottom: 3px;
+    font-size: 11px;
 }
 
-#titleSect{
-    color: #fff;
+.form-label-compact {
+    color: #c0c0c0;
+    margin-bottom: 2px;
+    font-size: 10px;
+    font-weight: bold;
+    display: block;
 }
 
 /* Stat Display */
 .stat-display {
-    background: #2d2d2d;
+    background: #252525;
     color: #4a9eff;
     text-align: center;
-    padding: 6px;
+    padding: 5px;
     border-radius: 4px;
     font-weight: bold;
-    font-size: 15px;
-    border: 1px solid #3d3d3d;
+    font-size: 14px;
+    border: 1px solid #333;
+}
+
+.stat-display-small {
+    background: #252525;
+    color: #4a9eff;
+    text-align: center;
+    padding: 4px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 13px;
+    border: 1px solid #333;
 }
 
 /* Abilities */
@@ -128,10 +148,10 @@ textarea.form-control {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 4px;
-    padding: 4px 6px;
-    background: #1f1f1f;
-    border-radius: 4px;
+    margin-bottom: 3px;
+    padding: 3px 5px;
+    background: #151515;
+    border-radius: 3px;
     border: 1px solid #2d2d2d;
 }
 
@@ -140,148 +160,202 @@ textarea.form-control {
     font-weight: bold;
     min-width: 40px;
     color: #e0e0e0;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .ability-score,
 .save-score {
-    width: 50px;
+    width: 48px;
 }
 
 .ability-modifier,
 .save-modifier {
-    background: #2d2d2d;
-    color: #4a9eff;
-    padding: 4px 8px;
-    border-radius: 4px;
-    min-width: 45px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 14px;
-    border: 1px solid #3d3d3d;
-}
-
-/* Skills */
-.skill-row {
-    display: flex;
-    align-items: center;
-    padding: 2px 4px;
-    margin-bottom: 1px;
-    background: #1f1f1f;
-    border-radius: 3px;
-    border: 1px solid #2d2d2d;
-    font-size: 12px;
-}
-
-.skill-row:nth-child(even) {
     background: #252525;
-}
-
-.skill-name {
-    flex: 1;
-    color: #d0d0d0;
-    font-size: 12px;
-}
-
-.skill-mod {
-    background: #2d2d2d;
-    color: #5cb85c;
-    padding: 2px 6px;
+    color: #4a9eff;
+    padding: 3px 7px;
     border-radius: 3px;
-    min-width: 40px;
+    min-width: 42px;
     text-align: center;
     font-weight: bold;
-    margin: 0 4px;
-    font-size: 12px;
-    border: 1px solid #3d3d3d;
+    font-size: 13px;
+    border: 1px solid #333;
 }
 
-.skill-checkbox {
-    width: 16px;
-    height: 16px;
-    margin: 0 2px;
-    cursor: pointer;
-    accent-color: #4a9eff;
-}
-
-/* Weapons */
-.weapon-row {
-    display: flex;
-    gap: 4px;
+/* Skills - Fixed alignment */
+.skills-header {
+    padding: 0 4px;
     margin-bottom: 3px;
 }
 
+.skill-row-header {
+    display: grid;
+    grid-template-columns: 1fr 50px 30px 30px;
+    gap: 4px;
+    align-items: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.skill-name-header {
+    text-align: left;
+}
+
+.skill-mod-header {
+    text-align: center;
+}
+
+.skill-check-header {
+    text-align: center;
+}
+
+.skill-row {
+    display: grid;
+    grid-template-columns: 1fr 50px 30px 30px;
+    gap: 4px;
+    align-items: center;
+    padding: 2px 4px;
+    margin-bottom: 1px;
+    background: #151515;
+    border-radius: 3px;
+    border: 1px solid #2d2d2d;
+    font-size: 11px;
+}
+
+.skill-row:nth-child(even) {
+    background: #1a1a1a;
+}
+
+.skill-name {
+    color: #d0d0d0;
+    font-size: 11px;
+    text-align: left;
+}
+
+.skill-mod {
+    background: #252525;
+    color: #5cb85c;
+    padding: 2px 4px;
+    border-radius: 3px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 11px;
+    border: 1px solid #333;
+}
+
+.skill-checkbox {
+    width: 15px;
+    height: 15px;
+    margin: 0 auto;
+    cursor: pointer;
+    accent-color: #4a9eff;
+    display: block;
+}
+
+/* Weapons - Grid layout */
+.weapons-header-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr;
+    gap: 4px;
+    padding: 0 4px;
+    margin-bottom: 3px;
+    color: #c0c0c0;
+}
+
+.weapon-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr;
+    gap: 4px;
+    margin-bottom: 2px;
+}
+
 .weapon-row input {
-    font-size: 12px;
+    font-size: 11px;
     padding: 3px;
 }
 
-/* Equipment */
-.equipment-list {
-    max-height: 400px;
+/* Hit Dice - Custom styling for slash */
+.hit-dice-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.hit-dice-group input {
+    flex: 1;
+    min-width: 0;
+}
+
+.hit-dice-separator {
+    color: #333;
+    font-size: 10px;
+    font-weight: normal;
+    padding: 0 2px;
+    user-select: none;
+}
+
+/* Equipment - Fixed 150 slots with scroll */
+.equipment-list-scrollable {
+    max-height: 500px;
     overflow-y: auto;
+    padding-right: 4px;
 }
 
 .equipment-row {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 5px;
-    padding: 5px;
-    background: #1f1f1f;
-    border-radius: 4px;
+    display: grid;
+    grid-template-columns: 3fr 60px 2fr;
+    gap: 4px;
+    margin-bottom: 3px;
+    padding: 3px;
+    background: #151515;
+    border-radius: 3px;
     border: 1px solid #2d2d2d;
     align-items: center;
 }
 
 .equipment-row input {
-    background: #1a1a1a;
-    border: 1px solid #3d3d3d;
+    background: #0d0d0d;
+    border: 1px solid #333;
     color: #e0e0e0;
-    padding: 4px 8px;
+    padding: 3px 6px;
     border-radius: 3px;
-    font-size: 12px;
+    font-size: 11px;
 }
 
-.equipment-row input:first-child {
-    flex: 3;
+/* Notes TextAreas - Fixed height with scroll */
+.notes-textarea {
+    height: 280px !important;
+    min-height: 280px !important;
+    max-height: 280px !important;
+    resize: none !important;
+    overflow-y: auto !important;
 }
 
-.equipment-row input:nth-child(2) {
-    flex: 1;
-    text-align: center;
-}
-
-.equipment-row input:nth-child(3) {
-    flex: 2;
-}
-
-.equipment-row .btn {
-    flex: 0 0 auto;
-}
-
-/* Image Container */
+/* Image Container - Fixed size with proper scaling */
 .image-container {
-    min-height: 250px;
-    max-height: 500px;
+    width: 100%;
+    height: 450px;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #1a1a1a;
-    border-radius: 5px;
-    padding: 10px;
+    background: #0d0d0d;
+    border-radius: 4px;
+    padding: 4px;
     border: 1px solid #2d2d2d;
 }
 
 .image-container img {
     max-width: 100%;
     max-height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .image-container .text-muted {
-    color: #666 !important;
+    color: #555 !important;
 }
 
 /* Spell Slots */
@@ -289,104 +363,105 @@ textarea.form-control {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 8px;
-    margin-bottom: 4px;
-    background: #1f1f1f;
-    border-radius: 4px;
+    padding: 4px 6px;
+    margin-bottom: 3px;
+    background: #151515;
+    border-radius: 3px;
     border: 1px solid #2d2d2d;
 }
 
 .spell-slot-label {
     font-weight: bold;
-    min-width: 80px;
+    min-width: 70px;
     color: #d0d0d0;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .spell-slot-inputs {
     display: flex;
-    gap: 5px;
+    gap: 4px;
     align-items: center;
 }
 
 .spell-slot-inputs input {
-    width: 45px;
+    width: 40px;
     text-align: center;
 }
 
 .spell-slot-inputs span {
-    color: #b0b0b0;
+    color: #666;
+    font-size: 11px;
 }
 
 /* Spell Entry */
 .spell-entry {
     display: flex;
-    gap: 5px;
-    margin-bottom: 4px;
+    gap: 4px;
+    margin-bottom: 3px;
     align-items: center;
 }
 
 .spell-entry input[type="text"] {
     flex: 1;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .spell-entry label {
-    font-size: 11px;
+    font-size: 10px;
     margin: 0;
     color: #b0b0b0;
 }
 
 .spell-entry input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     accent-color: #4a9eff;
 }
 
 .cantrip-entry {
-    margin-bottom: 4px;
+    margin-bottom: 3px;
 }
 
 .cantrip-entry input {
-    font-size: 12px;
+    font-size: 11px;
 }
 
 /* Scaling Container */
 #scalingContainer .col-md-4 {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .scaling-skill-card {
-    padding: 8px;
-    background: #1f1f1f;
-    border-radius: 4px;
+    padding: 6px;
+    background: #151515;
+    border-radius: 3px;
     border: 1px solid #2d2d2d;
 }
 
 .scaling-skill-card label {
     font-weight: bold;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     display: block;
     color: #d0d0d0;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 /* DM Abilities */
 #dmAbilitiesContainer .col-4 {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .dm-ability-box {
-    background: #1f1f1f;
-    padding: 6px;
-    border-radius: 4px;
+    background: #151515;
+    padding: 5px;
+    border-radius: 3px;
     text-align: center;
     border: 1px solid #2d2d2d;
 }
 
 .dm-ability-box label {
     font-weight: bold;
-    font-size: 12px;
+    font-size: 11px;
     margin-bottom: 3px;
     color: #d0d0d0;
 }
@@ -394,25 +469,25 @@ textarea.form-control {
 .dm-ability-box input {
     width: 100%;
     text-align: center;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .dm-ability-box .stat-display {
-    font-size: 13px;
-    padding: 4px;
-    margin-top: 4px;
+    font-size: 12px;
+    padding: 3px;
+    margin-top: 3px;
 }
 
 /* Dice Log */
 .dice-log {
-    background: #0d0d0d;
+    background: #000;
     color: #5cb85c;
-    padding: 8px;
-    height: 150px;
+    padding: 6px;
+    height: 140px;
     overflow-y: auto;
     font-family: 'Courier New', monospace;
-    font-size: 12px;
-    border-radius: 4px;
+    font-size: 11px;
+    border-radius: 3px;
     border: 1px solid #2d2d2d;
     white-space: pre-wrap;
     word-wrap: break-word;
@@ -421,101 +496,102 @@ textarea.form-control {
 /* Death Saves */
 .death-save-success,
 .death-save-failure {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     cursor: pointer;
     accent-color: #4a9eff;
 }
 
 /* Buttons */
 .btn {
-    font-size: 13px;
-    padding: 5px 12px;
+    font-size: 12px;
+    padding: 4px 10px;
     border-radius: 4px;
     transition: all 0.2s;
     font-weight: 500;
 }
 
 .btn-sm {
-    font-size: 12px;
-    padding: 4px 10px;
+    font-size: 11px;
+    padding: 3px 8px;
 }
 
 .btn-primary {
-    background: #4a9eff;
-    border-color: #4a9eff;
+    background: #3d7fc4;
+    border-color: #3d7fc4;
     color: #fff;
 }
 
 .btn-primary:hover {
-    background: #3d8ae0;
-    border-color: #3d8ae0;
+    background: #2d6fb4;
+    border-color: #2d6fb4;
 }
 
 .btn-success {
-    background: #5cb85c;
-    border-color: #5cb85c;
+    background: #4a9a4a;
+    border-color: #4a9a4a;
     color: #fff;
 }
 
 .btn-success:hover {
-    background: #4ca94c;
-    border-color: #4ca94c;
+    background: #3a8a3a;
+    border-color: #3a8a3a;
 }
 
 .btn-danger {
-    background: #d9534f;
-    border-color: #d9534f;
+    background: #b54545;
+    border-color: #b54545;
     color: #fff;
 }
 
 .btn-danger:hover {
-    background: #c9443f;
-    border-color: #c9443f;
+    background: #a53535;
+    border-color: #a53535;
 }
 
 .btn-info {
-    background: #5bc0de;
-    border-color: #5bc0de;
+    background: #4aa8c2;
+    border-color: #4aa8c2;
     color: #fff;
 }
 
 .btn-info:hover {
-    background: #4bb0ce;
-    border-color: #4bb0ce;
+    background: #3a98b2;
+    border-color: #3a98b2;
 }
 
 .btn-secondary {
-    background: #6c757d;
-    border-color: #6c757d;
+    background: #555;
+    border-color: #555;
     color: #fff;
 }
 
 .btn-secondary:hover {
-    background: #5c656d;
-    border-color: #5c656d;
+    background: #444;
+    border-color: #444;
 }
 
 .btn-light {
-    background: #f8f9fa;
-    border-color: #f8f9fa;
-    color: #212529;
+    background: #3a3a3a;
+    border-color: #3a3a3a;
+    color: #e0e0e0;
 }
 
 .btn-light:hover {
-    background: #e8e9ea;
-    border-color: #e8e9ea;
+    background: #4a4a4a;
+    border-color: #4a4a4a;
+    color: #fff;
 }
 
 .btn-outline-light {
     background: transparent;
-    border-color: #6c757d;
+    border-color: #555;
     color: #b0b0b0;
 }
 
 .btn-outline-light:hover {
-    background: #3d3d3d;
-    border-color: #6c757d;
+    background: #2a2a2a;
+    border-color: #555;
     color: #fff;
 }
 
@@ -538,21 +614,21 @@ textarea.form-control {
 }
 
 ::-webkit-scrollbar-track {
-    background: #1a1a1a;
+    background: #0d0d0d;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #4a4a4a;
+    background: #3a3a3a;
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #5a5a5a;
+    background: #4a4a4a;
 }
 
 /* Text Colors */
 .text-muted {
-    color: #888 !important;
+    color: #666 !important;
 }
 
 .text-success {
@@ -573,45 +649,43 @@ textarea.form-control {
 }
 
 .small {
-    font-size: 12px;
+    font-size: 11px;
 }
 
 /* Responsive */
 @media (max-width: 991px) {
     .nav-tabs .nav-link {
-        padding: 6px 12px;
-        font-size: 12px;
+        padding: 5px 10px;
+        font-size: 11px;
     }
     
     .card-header {
-        font-size: 12px;
+        font-size: 11px;
     }
     
     .image-container {
-        min-height: 200px;
-        max-height: 400px;
+        height: 350px;
     }
     
     body {
-        font-size: 13px;
+        font-size: 12px;
     }
 }
 
 @media (max-width: 767px) {
     .nav-tabs .nav-link {
-        padding: 5px 10px;
-        font-size: 11px;
+        padding: 4px 8px;
+        font-size: 10px;
     }
     
     .ability-row,
     .save-row,
     .skill-row {
-        font-size: 11px;
+        font-size: 10px;
     }
     
     .image-container {
-        min-height: 150px;
-        max-height: 300px;
+        height: 280px;
     }
 }
 
