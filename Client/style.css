@@ -7,7 +7,7 @@
 }
 
 body {
-    background: #0d0d0d;
+    background: #0a0a0f;
     color: #e0e0e0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 13px;
@@ -16,54 +16,59 @@ body {
 .container-fluid {
     max-width: 1920px;
     margin: 0 auto;
-    background: #0d0d0d;
+    background: #0a0a0f;
 }
 
 /* Tabs */
 .nav-tabs {
-    border-bottom: 2px solid #2d2d2d;
+    border-bottom: 2px solid #1e1e2a;
 }
 
 .nav-tabs .nav-link {
-    color: #b0b0b0;
-    background: #1a1a1a;
-    border: 1px solid #2d2d2d;
+    color: #888;
+    background: #12121a;
+    border: 1px solid #1e1e2a;
     margin-right: 3px;
     font-weight: bold;
     font-size: 12px;
     padding: 6px 14px;
     border-radius: 5px 5px 0 0;
     transition: all 0.2s;
+    letter-spacing: 0.3px;
 }
 
 .nav-tabs .nav-link:hover {
-    background: #252525;
-    color: #fff;
+    background: #1e1e2a;
+    color: #ccc;
+    border-color: #2a2a3a;
 }
 
 .nav-tabs .nav-link.active {
-    background: #252525;
+    background: #1e1e2a;
     color: #fff;
     border-bottom: 2px solid #4a9eff;
+    border-color: #2a2a3a;
+    border-bottom-color: #4a9eff;
 }
 
 /* Cards */
 .card {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 5px;
+    background: #141419;
+    border: 1px solid #1e1e2a;
+    border-radius: 6px;
     margin-bottom: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .card-header {
-    background: #252525;
-    color: #fff;
+    background: #1e1e2a;
+    color: #ddd;
     font-weight: bold;
     font-size: 12px;
-    padding: 5px 10px;
-    border-bottom: 1px solid #333;
-    border-radius: 5px 5px 0 0;
+    padding: 6px 12px;
+    border-bottom: 2px solid #4a9eff22;
+    border-radius: 6px 6px 0 0;
+    letter-spacing: 0.5px;
 }
 
 .card-body {
@@ -71,33 +76,36 @@ body {
 }
 
 .card-header.bg-danger {
-    background: #7a2424 !important;
+    background: #2a1218 !important;
+    border-bottom-color: #d9534f33 !important;
 }
 
 .card-subtitle {
-    color: #c0c0c0;
+    color: #bbb;
     font-size: 12px;
+    letter-spacing: 0.3px;
 }
 
 /* Form Elements */
 .form-control,
 .form-select {
-    background: #0d0d0d;
-    border: 1px solid #333;
+    background: #0c0c12;
+    border: 1px solid #2a2a3a;
     color: #e0e0e0;
     font-size: 12px;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .form-control:focus,
 .form-select:focus {
-    background: #151515;
+    background: #111118;
     border-color: #4a9eff;
     color: #fff;
-    box-shadow: 0 0 0 0.15rem rgba(74, 158, 255, 0.2);
+    box-shadow: 0 0 0 0.15rem rgba(74, 158, 255, 0.15);
 }
 
 .form-control::placeholder {
-    color: #555;
+    color: #444;
 }
 
 textarea.form-control {
@@ -106,40 +114,72 @@ textarea.form-control {
 }
 
 .form-label {
-    color: #c0c0c0;
+    color: #999;
     margin-bottom: 3px;
     font-size: 11px;
 }
 
 .form-label-compact {
-    color: #c0c0c0;
+    color: #888;
     margin-bottom: 2px;
     font-size: 10px;
     font-weight: bold;
     display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Character Info - no custom grid needed, using Bootstrap row/col */
+
+/* Combat Stats Row */
+.combat-stats-row {
+    display: flex;
+    gap: 8px;
+}
+
+.combat-stat-box {
+    flex: 1;
+    background: #141419;
+    border: 1px solid #1e1e2a;
+    border-radius: 6px;
+    padding: 6px 8px;
+    text-align: center;
+    transition: border-color 0.15s;
+}
+
+.combat-stat-box:hover {
+    border-color: #2a2a3a;
+}
+
+.combat-stat-box .form-label-compact {
+    text-align: center;
+}
+
+.combat-stat-box .form-control-sm {
+    text-align: center;
 }
 
 /* Stat Display */
 .stat-display {
-    background: #252525;
+    background: #1a1a24;
     color: #4a9eff;
     text-align: center;
     padding: 5px;
     border-radius: 4px;
     font-weight: bold;
     font-size: 14px;
-    border: 1px solid #333;
+    border: 1px solid #2a2a3a;
 }
 
 .stat-display-small {
-    background: #252525;
+    background: #1a1a24;
     color: #4a9eff;
     text-align: center;
     padding: 4px;
-    border-radius: 3px;
+    border-radius: 4px;
     font-weight: bold;
     font-size: 13px;
-    border: 1px solid #333;
+    border: 1px solid #2a2a3a;
 }
 
 /* Abilities */
@@ -149,17 +189,23 @@ textarea.form-control {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 3px;
-    padding: 3px 5px;
-    background: #151515;
-    border-radius: 3px;
-    border: 1px solid #2d2d2d;
+    padding: 4px 6px;
+    background: #111118;
+    border-radius: 4px;
+    border: 1px solid #1e1e2a;
+    transition: border-color 0.15s;
+}
+
+#abilitiesContainer .ability-row:hover,
+#savesContainer .save-row:hover {
+    border-color: #2a2a3a;
 }
 
 .ability-label,
 .save-label {
     font-weight: bold;
     min-width: 40px;
-    color: #e0e0e0;
+    color: #ccc;
     font-size: 12px;
 }
 
@@ -170,15 +216,15 @@ textarea.form-control {
 
 .ability-modifier,
 .save-modifier {
-    background: #252525;
+    background: #1a1a24;
     color: #4a9eff;
     padding: 3px 7px;
-    border-radius: 3px;
+    border-radius: 4px;
     min-width: 42px;
     text-align: center;
     font-weight: bold;
     font-size: 13px;
-    border: 1px solid #333;
+    border: 1px solid #2a2a3a;
 }
 
 /* Skills - Fixed alignment */
@@ -194,7 +240,9 @@ textarea.form-control {
     align-items: center;
     font-size: 11px;
     font-weight: bold;
-    color: #fff;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .skill-name-header {
@@ -214,33 +262,38 @@ textarea.form-control {
     grid-template-columns: 1fr 50px 30px 30px;
     gap: 4px;
     align-items: center;
-    padding: 2px 4px;
+    padding: 3px 4px;
     margin-bottom: 1px;
-    background: #151515;
+    background: #111118;
     border-radius: 3px;
-    border: 1px solid #2d2d2d;
+    border: 1px solid #1e1e2a;
     font-size: 11px;
+    transition: border-color 0.15s;
 }
 
 .skill-row:nth-child(even) {
-    background: #1a1a1a;
+    background: #14141b;
+}
+
+.skill-row:hover {
+    border-color: #2a2a3a;
 }
 
 .skill-name {
-    color: #d0d0d0;
+    color: #ccc;
     font-size: 11px;
     text-align: left;
 }
 
 .skill-mod {
-    background: #252525;
+    background: #1a1a24;
     color: #5cb85c;
     padding: 2px 4px;
     border-radius: 3px;
     text-align: center;
     font-weight: bold;
     font-size: 11px;
-    border: 1px solid #333;
+    border: 1px solid #2a2a3a;
 }
 
 .skill-checkbox {
@@ -248,7 +301,7 @@ textarea.form-control {
     height: 15px;
     margin: 0 auto;
     cursor: pointer;
-    accent-color: #4a9eff;
+    accent-color: #5cb85c;
     display: block;
 }
 
@@ -259,7 +312,7 @@ textarea.form-control {
     gap: 4px;
     padding: 0 4px;
     margin-bottom: 3px;
-    color: #c0c0c0;
+    color: #888;
 }
 
 .weapon-row {
@@ -281,22 +334,43 @@ textarea.form-control {
     gap: 2px;
 }
 
-.hit-dice-group input {
+.hit-dice-group input,
+.hit-dice-group select {
     flex: 1;
     min-width: 0;
 }
 
+.hit-dice-group select {
+    padding: 2px 4px;
+    font-size: 11px;
+}
+
 .hit-dice-separator {
-    color: #333;
+    color: #4a9eff44;
     font-size: 10px;
     font-weight: normal;
     padding: 0 2px;
     user-select: none;
 }
 
+/* Equipment Tab - Stretch to match */
+.equip-row-stretch {
+    min-height: 620px;
+}
+
+.equip-row-stretch .card {
+    margin-bottom: 0;
+}
+
+.equip-notes-textarea {
+    resize: none !important;
+    overflow-y: auto !important;
+    min-height: 100px;
+}
+
 /* Equipment - Fixed 150 slots with scroll */
 .equipment-list-scrollable {
-    max-height: 500px;
+    max-height: calc(620px - 40px);
     overflow-y: auto;
     padding-right: 4px;
 }
@@ -307,22 +381,27 @@ textarea.form-control {
     gap: 4px;
     margin-bottom: 3px;
     padding: 3px;
-    background: #151515;
-    border-radius: 3px;
-    border: 1px solid #2d2d2d;
+    background: #111118;
+    border-radius: 4px;
+    border: 1px solid #1e1e2a;
     align-items: center;
+    transition: border-color 0.15s;
+}
+
+.equipment-row:hover {
+    border-color: #2a2a3a;
 }
 
 .equipment-row input {
-    background: #0d0d0d;
-    border: 1px solid #333;
+    background: #0c0c12;
+    border: 1px solid #2a2a3a;
     color: #e0e0e0;
     padding: 3px 6px;
     border-radius: 3px;
     font-size: 11px;
 }
 
-/* Notes TextAreas - Fixed height with scroll */
+/* Notes TextAreas - Default fixed height (used in DM tab old style) */
 .notes-textarea {
     height: 280px !important;
     min-height: 280px !important;
@@ -330,6 +409,7 @@ textarea.form-control {
     resize: none !important;
     overflow-y: auto !important;
 }
+
 
 /* Image Container - Fixed size with proper scaling */
 .image-container {
@@ -339,10 +419,10 @@ textarea.form-control {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #0d0d0d;
-    border-radius: 4px;
+    background: #0c0c12;
+    border-radius: 6px;
     padding: 4px;
-    border: 1px solid #2d2d2d;
+    border: 1px solid #1e1e2a;
 }
 
 .image-container img {
@@ -358,23 +438,186 @@ textarea.form-control {
     color: #555 !important;
 }
 
-/* Spell Slots */
+/* ==================== SPELLS TAB - Redesigned ==================== */
+
+/* Header Bar */
+.spells-header-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: #141419;
+    border: 1px solid #1e1e2a;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.spell-stat-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.spell-stat-label {
+    font-size: 9px;
+    font-weight: bold;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.spell-stat-value {
+    background: #1a1a24;
+    color: #4a9eff;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 4px 14px;
+    border-radius: 4px;
+    border: 1px solid #2a2a3a;
+    min-width: 50px;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.spell-stat-count {
+    font-size: 14px;
+    color: #5cb85c;
+    min-width: 40px;
+}
+
+.spell-stat-divider {
+    width: 1px;
+    height: 36px;
+    background: #2a2a3a;
+    margin: 0 4px;
+}
+
+.spell-ability-select {
+    background: #0c0c12;
+    border: 1px solid #4a9eff;
+    color: #4a9eff;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    width: 72px;
+    text-align: center;
+}
+
+.spell-ability-select:focus {
+    box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+    border-color: #4a9eff;
+    background: #111118;
+    color: #fff;
+}
+
+/* Spells Layout */
+.spells-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr 180px;
+    gap: 10px;
+}
+
+.spells-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.spells-card-header {
+    background: #1e1e2a;
+    border-bottom: 2px solid #4a9eff33;
+    font-size: 12px;
+}
+
+.spells-card-body {
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(100vh - 280px);
+}
+
+/* Spell Level Tabs (numbers) */
+.spell-level-tabs {
+    display: flex;
+    gap: 2px;
+}
+
+.spell-level-tab {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0c0c12;
+    border: 1px solid #2a2a3a;
+    border-radius: 4px;
+    color: #888;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 0;
+}
+
+.spell-level-tab:hover {
+    background: #1a1a24;
+    color: #fff;
+    border-color: #3a3a4a;
+}
+
+.spell-level-tab.active {
+    background: #4a9eff;
+    color: #fff;
+    border-color: #4a9eff;
+}
+
+/* Spell Level Panels - only show active */
+.spell-level-panel {
+    display: none;
+}
+
+.spell-level-panel.active {
+    display: block;
+}
+
+/* Spell Slots - Redesigned */
 .spell-slot-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 6px;
-    margin-bottom: 3px;
-    background: #151515;
-    border-radius: 3px;
-    border: 1px solid #2d2d2d;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    background: #111118;
+    border-radius: 4px;
+    border: 1px solid #1e1e2a;
+    transition: border-color 0.15s;
+}
+
+.spell-slot-row:hover {
+    border-color: #2a2a3a;
 }
 
 .spell-slot-label {
     font-weight: bold;
-    min-width: 70px;
+    min-width: 28px;
     color: #d0d0d0;
     font-size: 11px;
+}
+
+.spell-slot-level-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: #4a9eff22;
+    color: #4a9eff;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-right: 6px;
 }
 
 .spell-slot-inputs {
@@ -384,21 +627,30 @@ textarea.form-control {
 }
 
 .spell-slot-inputs input {
-    width: 40px;
+    width: 36px;
     text-align: center;
+    font-size: 11px;
+    padding: 2px;
 }
 
 .spell-slot-inputs span {
-    color: #666;
-    font-size: 11px;
+    color: #555;
+    font-size: 10px;
 }
 
-/* Spell Entry */
+/* Spell Entry - Redesigned */
 .spell-entry {
     display: flex;
-    gap: 4px;
-    margin-bottom: 3px;
+    gap: 6px;
+    margin-bottom: 4px;
     align-items: center;
+    padding: 3px 4px;
+    border-radius: 3px;
+    transition: background 0.15s;
+}
+
+.spell-entry:hover {
+    background: #14141b;
 }
 
 .spell-entry input[type="text"] {
@@ -407,23 +659,46 @@ textarea.form-control {
 }
 
 .spell-entry label {
-    font-size: 10px;
+    font-size: 9px;
     margin: 0;
-    color: #b0b0b0;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .spell-entry input[type="checkbox"] {
-    width: 14px;
-    height: 14px;
-    accent-color: #4a9eff;
+    width: 15px;
+    height: 15px;
+    accent-color: #5cb85c;
+    cursor: pointer;
 }
 
+/* Cantrip Entry - Redesigned */
 .cantrip-entry {
-    margin-bottom: 3px;
+    margin-bottom: 4px;
 }
 
 .cantrip-entry input {
     font-size: 11px;
+    border-left: 2px solid #4a9eff44;
+    padding-left: 8px;
+}
+
+.cantrip-entry input:focus {
+    border-left-color: #4a9eff;
+}
+
+/* Responsive for spells layout */
+@media (max-width: 991px) {
+    .spells-layout {
+        grid-template-columns: 1fr;
+    }
+    .spells-card-body {
+        max-height: 300px;
+    }
+    .spells-header-bar {
+        gap: 8px;
+    }
 }
 
 /* Scaling Container */
@@ -433,73 +708,126 @@ textarea.form-control {
 
 .scaling-skill-card {
     padding: 6px;
-    background: #151515;
-    border-radius: 3px;
-    border: 1px solid #2d2d2d;
+    background: #111118;
+    border-radius: 4px;
+    border: 1px solid #1e1e2a;
+    transition: border-color 0.15s;
+}
+
+.scaling-skill-card:hover {
+    border-color: #2a2a3a;
 }
 
 .scaling-skill-card label {
     font-weight: bold;
     margin-bottom: 3px;
     display: block;
-    color: #d0d0d0;
+    color: #ccc;
     font-size: 11px;
 }
 
 /* DM Abilities */
 #dmAbilitiesContainer .col-4 {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .dm-ability-box {
-    background: #151515;
-    padding: 5px;
-    border-radius: 3px;
+    background: #111118;
+    padding: 4px;
+    border-radius: 4px;
     text-align: center;
-    border: 1px solid #2d2d2d;
+    border: 1px solid #1e1e2a;
+    transition: border-color 0.15s;
+}
+
+.dm-ability-box:hover {
+    border-color: #2a2a3a;
 }
 
 .dm-ability-box label {
     font-weight: bold;
-    font-size: 11px;
-    margin-bottom: 3px;
-    color: #d0d0d0;
+    font-size: 10px;
+    margin-bottom: 2px;
+    color: #ccc;
 }
 
 .dm-ability-box input {
     width: 100%;
     text-align: center;
     font-size: 11px;
+    padding: 2px 4px;
 }
 
 .dm-ability-box .stat-display {
-    font-size: 12px;
-    padding: 3px;
-    margin-top: 3px;
+    font-size: 11px;
+    padding: 2px;
+    margin-top: 2px;
 }
 
 /* Dice Log */
 .dice-log {
-    background: #000;
+    background: #08080e;
     color: #5cb85c;
-    padding: 6px;
+    padding: 8px;
     height: 140px;
     overflow-y: auto;
     font-family: 'Courier New', monospace;
     font-size: 11px;
-    border-radius: 3px;
-    border: 1px solid #2d2d2d;
+    border-radius: 4px;
+    border: 1px solid #1e1e2a;
     white-space: pre-wrap;
     word-wrap: break-word;
 }
 
+.dm-dice-log {
+    height: calc(100vh - 520px);
+    min-height: 100px;
+}
+
+/* DM Image Container - Fixed size, images adapt */
+.dm-image-container {
+    width: 100%;
+    height: calc(100vh - 200px);
+    min-height: 300px;
+    max-height: 600px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0c0c12;
+    border-radius: 6px;
+    padding: 4px;
+    border: 1px solid #1e1e2a;
+}
+
+.dm-image-container img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+/* DM Notes */
+.dm-notes-textarea {
+    resize: none !important;
+    overflow-y: auto !important;
+}
+
 /* Death Saves */
-.death-save-success,
+.death-save-success {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #5cb85c;
+}
+
 .death-save-failure {
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: #4a9eff;
+    accent-color: #d9534f;
 }
 
 /* Buttons */
@@ -509,6 +837,7 @@ textarea.form-control {
     border-radius: 4px;
     transition: all 0.2s;
     font-weight: 500;
+    letter-spacing: 0.2px;
 }
 
 .btn-sm {
@@ -517,19 +846,19 @@ textarea.form-control {
 }
 
 .btn-primary {
-    background: #3d7fc4;
-    border-color: #3d7fc4;
+    background: #2563a8;
+    border-color: #2563a8;
     color: #fff;
 }
 
 .btn-primary:hover {
-    background: #2d6fb4;
-    border-color: #2d6fb4;
+    background: #4a9eff;
+    border-color: #4a9eff;
 }
 
 .btn-success {
-    background: #4a9a4a;
-    border-color: #4a9a4a;
+    background: #2d7a2d;
+    border-color: #2d7a2d;
     color: #fff;
 }
 
@@ -539,8 +868,8 @@ textarea.form-control {
 }
 
 .btn-danger {
-    background: #b54545;
-    border-color: #b54545;
+    background: #8a2a2a;
+    border-color: #8a2a2a;
     color: #fff;
 }
 
@@ -550,8 +879,8 @@ textarea.form-control {
 }
 
 .btn-info {
-    background: #4aa8c2;
-    border-color: #4aa8c2;
+    background: #2a7a9a;
+    border-color: #2a7a9a;
     color: #fff;
 }
 
@@ -561,38 +890,39 @@ textarea.form-control {
 }
 
 .btn-secondary {
-    background: #555;
-    border-color: #555;
-    color: #fff;
+    background: #2a2a35;
+    border-color: #3a3a4a;
+    color: #ccc;
 }
 
 .btn-secondary:hover {
-    background: #444;
-    border-color: #444;
+    background: #3a3a4a;
+    border-color: #4a4a5a;
+    color: #fff;
 }
 
 .btn-light {
-    background: #3a3a3a;
-    border-color: #3a3a3a;
-    color: #e0e0e0;
+    background: #1e1e2a;
+    border-color: #2a2a3a;
+    color: #ccc;
 }
 
 .btn-light:hover {
-    background: #4a4a4a;
-    border-color: #4a4a4a;
+    background: #2a2a3a;
+    border-color: #3a3a4a;
     color: #fff;
 }
 
 .btn-outline-light {
     background: transparent;
-    border-color: #555;
-    color: #b0b0b0;
+    border-color: #2a2a3a;
+    color: #888;
 }
 
 .btn-outline-light:hover {
-    background: #2a2a2a;
-    border-color: #555;
-    color: #fff;
+    background: #1a1a24;
+    border-color: #4a9eff;
+    color: #4a9eff;
 }
 
 .btn-group .btn {
@@ -609,21 +939,21 @@ textarea.form-control {
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #0d0d0d;
+    background: #0a0a0f;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #3a3a3a;
-    border-radius: 4px;
+    background: #2a2a3a;
+    border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #4a4a4a;
+    background: #4a9eff44;
 }
 
 /* Text Colors */
@@ -669,6 +999,26 @@ textarea.form-control {
     
     body {
         font-size: 12px;
+    }
+    
+    .combat-stats-row {
+        flex-wrap: wrap;
+    }
+    
+    .combat-stat-box {
+        flex: 1 1 45%;
+    }
+    
+    .dm-dice-log {
+        height: 120px;
+    }
+    
+    .equip-row-stretch {
+        min-height: auto;
+    }
+    
+    .equipment-list-scrollable {
+        max-height: 400px;
     }
 }
 

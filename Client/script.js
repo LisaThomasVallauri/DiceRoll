@@ -201,6 +201,7 @@ function updateAllCalculations() {
     updateSaves();
     updateSkills();
     updateDMInitiative();
+    updateSpellcastingStats();
 }
 
 // ==================== WEAPONS ====================
@@ -238,30 +239,27 @@ function initializeEquipment() {
 function initializeSpells() {
     // Cantrips
     const cantripsContainer = document.getElementById('cantripsContainer');
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 15; i++) {
         const entry = document.createElement('div');
         entry.className = 'cantrip-entry';
         entry.innerHTML = `<input type="text" class="form-control form-control-sm" placeholder="Trucchetto ${i + 1}">`;
         cantripsContainer.appendChild(entry);
+        // Listen for changes to auto-count cantrips
+        entry.querySelector('input').addEventListener('input', updateSpellCounts);
     }
     
-    // Spell Levels
+    // Spell Levels - each as a hidden panel, only level 1 visible by default
     const spellLevelsContainer = document.getElementById('spellLevelsContainer');
     for (let level = 1; level <= 9; level++) {
-        const card = document.createElement('div');
-        card.className = 'card mb-2';
-        card.innerHTML = `
-            <div class="card-header">
-                INCANTESIMI DI ${level}° LIVELLO
-            </div>
-            <div class="card-body p-2" id="spellLevel${level}Container">
-            </div>
-        `;
-        spellLevelsContainer.appendChild(card);
+        const panel = document.createElement('div');
+        panel.className = `spell-level-panel${level === 1 ? ' active' : ''}`;
+        panel.id = `spellPanel${level}`;
+        
+        const innerContainer = document.createElement('div');
+        innerContainer.id = `spellLevel${level}Container`;
         
         // Add 10 spell entries per level
-        const levelContainer = document.getElementById(`spellLevel${level}Container`);
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 15; i++) {
             const entry = document.createElement('div');
             entry.className = 'spell-entry';
             entry.innerHTML = `
@@ -269,9 +267,26 @@ function initializeSpells() {
                 <label class="form-check-label small">Prep:</label>
                 <input type="checkbox" class="form-check-input">
             `;
-            levelContainer.appendChild(entry);
+            innerContainer.appendChild(entry);
+            // Listen for changes to auto-count spells and prepared
+            entry.querySelector('input[type="text"]').addEventListener('input', updateSpellCounts);
+            entry.querySelector('input[type="checkbox"]').addEventListener('change', updateSpellCounts);
         }
+        
+        panel.appendChild(innerContainer);
+        spellLevelsContainer.appendChild(panel);
     }
+    
+    // Spell level TAB buttons listener (replaces dropdown)
+    document.querySelectorAll('.spell-level-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const selectedLevel = this.dataset.level;
+            document.querySelectorAll('.spell-level-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelectorAll('.spell-level-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`spellPanel${selectedLevel}`).classList.add('active');
+        });
+    });
     
     // Spell Slots
     const slotsContainer = document.getElementById('spellSlotsContainer');
@@ -279,7 +294,8 @@ function initializeSpells() {
         const row = document.createElement('div');
         row.className = 'spell-slot-row';
         row.innerHTML = `
-            <span class="spell-slot-label">Livello ${level}</span>
+            <span class="spell-slot-level-badge">${level}</span>
+            <span class="spell-slot-label">Lv.${level}</span>
             <div class="spell-slot-inputs">
                 <input type="number" class="form-control form-control-sm" id="slotAvail${level}" value="0" min="0">
                 <span>/</span>
@@ -288,6 +304,59 @@ function initializeSpells() {
         `;
         slotsContainer.appendChild(row);
     }
+    
+    // Spellcasting ability selector listener
+    document.getElementById('spellAbility').addEventListener('change', updateSpellcastingStats);
+}
+
+// Update spellcasting CD and bonus attack based on selected ability
+function updateSpellcastingStats() {
+    const selectedAbility = document.getElementById('spellAbility').value;
+    const profBonus = parseInt(document.getElementById('profBonus').value) || 2;
+    
+    if (selectedAbility === '-') {
+        document.getElementById('spellSaveDC').textContent = '-';
+        document.getElementById('spellAttackBonus').textContent = '-';
+        return;
+    }
+    
+    const abilityMod = abilityModifiers[selectedAbility] || 0;
+    
+    // CD = 8 + modificatore statistica + competenza
+    const saveDC = 8 + abilityMod + profBonus;
+    document.getElementById('spellSaveDC').textContent = saveDC;
+    
+    // Bonus attacco = modificatore statistica + competenza
+    const attackBonus = abilityMod + profBonus;
+    document.getElementById('spellAttackBonus').textContent = attackBonus >= 0 ? `+${attackBonus}` : `${attackBonus}`;
+}
+
+// Auto-count cantrips, spells and prepared spells
+function updateSpellCounts() {
+    // Count cantrips: textboxes with text inside
+    let cantripCount = 0;
+    document.querySelectorAll('#cantripsContainer .cantrip-entry input[type="text"]').forEach(input => {
+        if (input.value.trim() !== '') cantripCount++;
+    });
+    document.getElementById('cantripsKnown').textContent = cantripCount;
+    
+    // Count spells: textboxes with text across all levels
+    let spellCount = 0;
+    let preparedCount = 0;
+    for (let level = 1; level <= 9; level++) {
+        document.querySelectorAll(`#spellLevel${level}Container .spell-entry`).forEach(entry => {
+            const textInput = entry.querySelector('input[type="text"]');
+            const checkbox = entry.querySelector('input[type="checkbox"]');
+            if (textInput && textInput.value.trim() !== '') {
+                spellCount++;
+            }
+            if (checkbox && checkbox.checked) {
+                preparedCount++;
+            }
+        });
+    }
+    document.getElementById('spellsKnown').textContent = spellCount;
+    document.getElementById('spellsPrepared').textContent = preparedCount;
 }
 
 // ==================== SCALING ====================
@@ -577,23 +646,111 @@ function updateDMImageCounter() {
 }
 
 // ==================== SAVE/LOAD DATA ====================
-function saveData() {
+let currentFileHandle = null; // Stores the file handle from File System Access API
+
+async function saveData() {
+    // Remember the currently active tab so we don't reset it
+    const activeTabBtn = document.querySelector('#mainTabs .nav-link.active');
+    
     const data = getAllData();
     const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
+    
+    // If we have a file handle from a previous save/load, write directly to it
+    if (currentFileHandle && typeof currentFileHandle.createWritable === 'function') {
+        try {
+            const writable = await currentFileHandle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            
+            // Flash a brief "saved" indicator
+            showSaveIndicator();
+            return; // Saved silently without re-downloading
+        } catch (err) {
+            // Permission denied or handle stale - fall through to saveAs
+        }
+    }
+    
+    // No handle or failed - behave like Save As
+    await saveDataAs();
+    
+    // Restore active tab if it changed
+    if (activeTabBtn) {
+        activeTabBtn.click();
+    }
+}
+
+function showSaveIndicator() {
+    // Brief visual feedback that save completed
+    const saveBtn = document.querySelector('.btn-success');
+    if (saveBtn) {
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = 'Salvato!';
+        saveBtn.style.background = '#2d8a2d';
+        setTimeout(() => {
+            saveBtn.textContent = originalText;
+            saveBtn.style.background = '';
+        }, 1200);
+    }
+}
+
+async function saveDataAs() {
+    const data = getAllData();
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const defaultName = `${data.character_info.name || 'personaggio'}_dnd_sheet.json`;
+    
+    // Try File System Access API (Chrome/Edge)
+    if (window.showSaveFilePicker) {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: defaultName,
+                types: [{
+                    description: 'JSON File',
+                    accept: { 'application/json': ['.json'] }
+                }]
+            });
+            const writable = await handle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            currentFileHandle = handle; // Store for future "Salva" calls
+            return;
+        } catch (err) {
+            if (err.name === 'AbortError') return; // User cancelled
+        }
+    }
+    
+    // Fallback: classic download
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${data.character_info.name || 'personaggio'}_dnd_sheet.json`;
+    a.download = defaultName;
     a.click();
     URL.revokeObjectURL(url);
 }
 
-function saveDataAs() {
-    saveData();
-}
-
-function loadData() {
+async function loadData() {
+    // Try File System Access API first (Chrome/Edge)
+    if (window.showOpenFilePicker) {
+        try {
+            const [handle] = await window.showOpenFilePicker({
+                types: [{
+                    description: 'JSON File',
+                    accept: { 'application/json': ['.json'] }
+                }]
+            });
+            const file = await handle.getFile();
+            const text = await file.text();
+            const data = JSON.parse(text);
+            setAllData(data);
+            currentFileHandle = handle; // Store so "Salva" writes to same file
+            return;
+        } catch (err) {
+            if (err.name === 'AbortError') return;
+        }
+    }
+    
+    // Fallback: classic file input
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
@@ -606,7 +763,6 @@ function loadData() {
             try {
                 const data = JSON.parse(event.target.result);
                 setAllData(data);
-                alert('Dati caricati con successo!');
             } catch (error) {
                 alert('Errore nel caricamento dei dati: ' + error.message);
             }
@@ -673,14 +829,9 @@ function getAllData() {
         },
         spells: {
             spellcasting: {
-                ability: document.getElementById('spellAbility').value,
-                save_dc: document.getElementById('spellSaveDC').value,
-                attack_bonus: document.getElementById('spellAttackBonus').value,
-                spells_known: document.getElementById('spellsKnown').value,
-                spells_prepared: document.getElementById('spellsPrepared').value
+                ability: document.getElementById('spellAbility').value
             },
             cantrips: {
-                known: document.getElementById('cantripsKnown').value,
                 list: []
             },
             slots: [],
@@ -831,7 +982,18 @@ function setAllData(data) {
         if (data.combat.hit_dice) {
             if (data.combat.hit_dice.current !== undefined) document.getElementById('diceCurrent').value = data.combat.hit_dice.current;
             if (data.combat.hit_dice.max !== undefined) document.getElementById('diceMax').value = data.combat.hit_dice.max;
-            if (data.combat.hit_dice.type !== undefined) document.getElementById('diceType').value = data.combat.hit_dice.type;
+            if (data.combat.hit_dice.type !== undefined) {
+                const diceTypeEl = document.getElementById('diceType');
+                // Match the value to the select options
+                const val = data.combat.hit_dice.type.toLowerCase().replace(/\s/g, '');
+                const options = diceTypeEl.options;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].value === val) {
+                        diceTypeEl.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
         }
         
         if (data.combat.death_saves) {
@@ -903,17 +1065,12 @@ function setAllData(data) {
     // Spells
     if (data.spells) {
         if (data.spells.spellcasting) {
-            if (data.spells.spellcasting.ability !== undefined) document.getElementById('spellAbility').value = data.spells.spellcasting.ability;
-            if (data.spells.spellcasting.save_dc !== undefined) document.getElementById('spellSaveDC').value = data.spells.spellcasting.save_dc;
-            if (data.spells.spellcasting.attack_bonus !== undefined) document.getElementById('spellAttackBonus').value = data.spells.spellcasting.attack_bonus;
-            if (data.spells.spellcasting.spells_known !== undefined) document.getElementById('spellsKnown').value = data.spells.spellcasting.spells_known;
-            if (data.spells.spellcasting.spells_prepared !== undefined) document.getElementById('spellsPrepared').value = data.spells.spellcasting.spells_prepared;
+            if (data.spells.spellcasting.ability !== undefined) {
+                document.getElementById('spellAbility').value = data.spells.spellcasting.ability;
+            }
         }
         
         if (data.spells.cantrips) {
-            if (data.spells.cantrips.known !== undefined) {
-                document.getElementById('cantripsKnown').value = data.spells.cantrips.known;
-            }
             if (data.spells.cantrips.list) {
                 const cantrips = document.querySelectorAll('#cantripsContainer input');
                 data.spells.cantrips.list.forEach((cantrip, i) => {
@@ -947,6 +1104,10 @@ function setAllData(data) {
                 }
             });
         }
+        
+        // Recalculate auto-counts and spellcasting stats after loading
+        updateSpellCounts();
+        updateSpellcastingStats();
     }
     
     // Text Areas
