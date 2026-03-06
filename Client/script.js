@@ -239,7 +239,7 @@ function initializeEquipment() {
 function initializeSpells() {
     // Cantrips
     const cantripsContainer = document.getElementById('cantripsContainer');
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 8; i++) {
         const entry = document.createElement('div');
         entry.className = 'cantrip-entry';
         entry.innerHTML = `<input type="text" class="form-control form-control-sm" placeholder="Trucchetto ${i + 1}">`;
@@ -259,7 +259,7 @@ function initializeSpells() {
         innerContainer.id = `spellLevel${level}Container`;
         
         // Add 10 spell entries per level
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 10; i++) {
             const entry = document.createElement('div');
             entry.className = 'spell-entry';
             entry.innerHTML = `
@@ -645,12 +645,27 @@ function updateDMImageCounter() {
     counter.textContent = `(${dmImages.length > 0 ? currentDMImageIndex + 1 : 0}/${dmImages.length})`;
 }
 
+// ==================== LOADING OVERLAY ====================
+function showLoading(text) {
+    const overlay = document.getElementById('loadingOverlay');
+    const spinnerText = overlay.querySelector('.spinner-text');
+    spinnerText.textContent = text || 'Caricamento...';
+    overlay.style.display = 'flex';
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.style.display = 'none';
+}
+
 // ==================== SAVE/LOAD DATA ====================
 let currentFileHandle = null; // Stores the file handle from File System Access API
 
 async function saveData() {
     // Remember the currently active tab so we don't reset it
     const activeTabBtn = document.querySelector('#mainTabs .nav-link.active');
+    
+    showLoading('Salvataggio in corso...');
     
     const data = getAllData();
     const json = JSON.stringify(data, null, 2);
@@ -664,6 +679,8 @@ async function saveData() {
             await writable.close();
             
             // Flash a brief "saved" indicator
+            await delay(400);
+            hideLoading();
             showSaveIndicator();
             return; // Saved silently without re-downloading
         } catch (err) {
@@ -671,6 +688,7 @@ async function saveData() {
         }
     }
     
+    hideLoading();
     // No handle or failed - behave like Save As
     await saveDataAs();
     
@@ -678,6 +696,10 @@ async function saveData() {
     if (activeTabBtn) {
         activeTabBtn.click();
     }
+}
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function showSaveIndicator() {
@@ -695,10 +717,15 @@ function showSaveIndicator() {
 }
 
 async function saveDataAs() {
+    showLoading('Salvataggio in corso...');
+    
     const data = getAllData();
     const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const defaultName = `${data.character_info.name || 'personaggio'}_dnd_sheet.json`;
+    
+    await delay(400);
+    hideLoading();
     
     // Try File System Access API (Chrome/Edge)
     if (window.showSaveFilePicker) {
@@ -710,13 +737,17 @@ async function saveDataAs() {
                     accept: { 'application/json': ['.json'] }
                 }]
             });
+            showLoading('Scrittura file...');
             const writable = await handle.createWritable();
             await writable.write(blob);
             await writable.close();
-            currentFileHandle = handle; // Store for future "Salva" calls
+            currentFileHandle = handle;
+            await delay(300);
+            hideLoading();
             return;
         } catch (err) {
-            if (err.name === 'AbortError') return; // User cancelled
+            hideLoading();
+            if (err.name === 'AbortError') return;
         }
     }
     
@@ -739,13 +770,17 @@ async function loadData() {
                     accept: { 'application/json': ['.json'] }
                 }]
             });
+            showLoading('Caricamento scheda...');
             const file = await handle.getFile();
             const text = await file.text();
             const data = JSON.parse(text);
             setAllData(data);
-            currentFileHandle = handle; // Store so "Salva" writes to same file
+            currentFileHandle = handle;
+            await delay(500);
+            hideLoading();
             return;
         } catch (err) {
+            hideLoading();
             if (err.name === 'AbortError') return;
         }
     }
@@ -758,12 +793,16 @@ async function loadData() {
         const file = e.target.files[0];
         if (!file) return;
         
+        showLoading('Caricamento scheda...');
         const reader = new FileReader();
-        reader.onload = function(event) {
+        reader.onload = async function(event) {
             try {
                 const data = JSON.parse(event.target.result);
                 setAllData(data);
+                await delay(500);
+                hideLoading();
             } catch (error) {
+                hideLoading();
                 alert('Errore nel caricamento dei dati: ' + error.message);
             }
         };
@@ -774,7 +813,10 @@ async function loadData() {
 
 function resetSheet() {
     if (confirm('Sei sicuro di voler resettare tutta la scheda? Questa azione non puo\' essere annullata.')) {
-        location.reload();
+        showLoading('Reset in corso...');
+        setTimeout(() => {
+            location.reload();
+        }, 600);
     }
 }
 
@@ -1172,3 +1214,174 @@ function setAllData(data) {
     // Update all calculations
     updateAllCalculations();
 }
+
+// ==================== PARTY CHAT ====================
+function initializePartyChat() {
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+    const chatImageBtn = document.getElementById('chatImageBtn');
+    const chatImageInput = document.getElementById('chatImageInput');
+    const chatDiceBtn = document.getElementById('chatDiceBtn');
+    const passwordToggle = document.getElementById('partyPasswordToggle');
+    
+    // Send message on Enter
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendChatMessage();
+    });
+    
+    // Send button
+    chatSendBtn.addEventListener('click', sendChatMessage);
+    
+    // Image button
+    chatImageBtn.addEventListener('click', function() {
+        chatImageInput.click();
+    });
+    
+    // Image upload handler
+    chatImageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            addChatMessage(getNickname(), null, ev.target.result, true);
+        };
+        reader.readAsDataURL(file);
+        this.value = ''; // Reset so same file can be selected again
+    });
+    
+    // Dice popup toggle
+    chatDiceBtn.addEventListener('click', function() {
+        const popup = document.getElementById('chatDicePopup');
+        if (!popup) {
+            createDicePopup();
+        } else {
+            popup.classList.toggle('visible');
+        }
+    });
+    
+    // Password toggle
+    passwordToggle.addEventListener('click', function() {
+        const pwInput = document.getElementById('partyPassword');
+        if (pwInput.type === 'password') {
+            pwInput.type = 'text';
+        } else {
+            pwInput.type = 'password';
+        }
+    });
+    
+    // Close dice popup on outside click
+    document.addEventListener('click', function(e) {
+        const popup = document.getElementById('chatDicePopup');
+        if (popup && !popup.contains(e.target) && e.target !== chatDiceBtn && !chatDiceBtn.contains(e.target)) {
+            popup.classList.remove('visible');
+        }
+    });
+}
+
+function getNickname() {
+    return document.getElementById('partyNickname').value.trim() || 'Anonimo';
+}
+
+function sendChatMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const text = chatInput.value.trim();
+    if (!text) return;
+    
+    // Check for dice command
+    if (text.startsWith('/roll ') || text.startsWith('/r ')) {
+        const diceCmd = text.replace(/^\/(roll|r)\s+/, '');
+        try {
+            const result = interpretDiceCommand(diceCmd);
+            addChatMessage(getNickname(), null, null, true, { command: diceCmd, result: result });
+        } catch (err) {
+            addChatMessage('Sistema', 'Comando dado non valido: ' + err.message, null, false);
+        }
+    } else {
+        addChatMessage(getNickname(), text, null, true);
+    }
+    
+    chatInput.value = '';
+}
+
+function addChatMessage(author, text, imageData, isSelf, diceData) {
+    const messagesArea = document.getElementById('chatMessages');
+    
+    // Remove welcome message if present
+    const welcomeMsg = messagesArea.querySelector('.chat-welcome-msg');
+    if (welcomeMsg) welcomeMsg.remove();
+    
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `chat-msg ${isSelf ? 'self' : 'other'}`;
+    
+    let content = `<div class="chat-msg-author">${escapeHtml(author)}</div>`;
+    
+    if (text) {
+        content += `<p class="chat-msg-text">${escapeHtml(text)}</p>`;
+    }
+    
+    if (imageData) {
+        content += `<img src="${imageData}" class="chat-msg-image" alt="Immagine condivisa" onclick="window.open(this.src, '_blank')">`;
+    }
+    
+    if (diceData) {
+        content += `
+            <div class="chat-msg-dice">
+                <span class="chat-dice-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                </span>
+                <div>
+                    <div class="chat-dice-result">${escapeHtml(diceData.result)}</div>
+                    <div class="chat-dice-detail">${escapeHtml(diceData.command)}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    msgDiv.innerHTML = content;
+    messagesArea.appendChild(msgDiv);
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function createDicePopup() {
+    const chatInputArea = document.querySelector('.chat-input-area');
+    const popup = document.createElement('div');
+    popup.id = 'chatDicePopup';
+    popup.className = 'chat-dice-popup visible';
+    
+    const diceTypes = ['1d4', '1d6', '1d8', '1d10', '1d12', '1d20', '1d100', '2d6'];
+    
+    popup.innerHTML = `
+        <div class="chat-dice-popup-title">Tira Dadi</div>
+        <div class="chat-dice-popup-grid">
+            ${diceTypes.map(d => `<button class="chat-dice-popup-btn" data-dice="${d}">${d}</button>`).join('')}
+        </div>
+    `;
+    
+    chatInputArea.style.position = 'relative';
+    chatInputArea.appendChild(popup);
+    
+    popup.querySelectorAll('.chat-dice-popup-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const dice = this.dataset.dice;
+            try {
+                const result = interpretDiceCommand(dice);
+                addChatMessage(getNickname(), null, null, true, { command: dice, result: result });
+            } catch (err) {
+                // ignore
+            }
+            popup.classList.remove('visible');
+        });
+    });
+}
+
+// Initialize party chat on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializePartyChat();
+});
