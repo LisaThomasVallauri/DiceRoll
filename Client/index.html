@@ -18,6 +18,12 @@
         </div>
     </div>
 
+    <!-- Image Lightbox Modal -->
+    <div id="imageLightbox" class="image-lightbox-overlay" onclick="closeLightbox(event)">
+        <button class="image-lightbox-close" onclick="closeLightbox(event)">&times;</button>
+        <img id="lightboxImage" class="image-lightbox-content" src="" alt="Immagine ingrandita">
+    </div>
+
     <div class="container-fluid p-3">
         <!-- Tabs Navigation with Action Buttons -->
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -58,57 +64,57 @@
                     <div class="card-header">INFORMAZIONI PERSONAGGIO</div>
                     <div class="card-body p-2">
                         <div class="row g-2 mb-1">
-                            <div class="col-lg-3 col-md-3">
+                            <div class="col-2">
                                 <label class="form-label-compact">Nome Personaggio</label>
                                 <input type="text" class="form-control form-control-sm" id="charName">
                             </div>
-                            <div class="col-lg-2 col-md-2">
+                            <div class="col-2">
                                 <label class="form-label-compact">Classe</label>
                                 <input type="text" class="form-control form-control-sm" id="charClass">
                             </div>
-                            <div class="col-lg-2 col-md-2">
+                            <div class="col-2">
                                 <label class="form-label-compact">Razza</label>
                                 <input type="text" class="form-control form-control-sm" id="charRace">
                             </div>
-                            <div class="col-lg-1 col-md-1">
-                                <label class="form-label-compact">Livello</label>
-                                <input type="number" class="form-control form-control-sm" id="charLevel" value="1">
-                            </div>
-                            <div class="col-lg-1 col-md-1">
-                                <label class="form-label-compact">Eta'</label>
-                                <input type="text" class="form-control form-control-sm" id="charAge">
-                            </div>
-                            <div class="col-lg-1 col-md-1">
-                                <label class="form-label-compact">Altezza</label>
-                                <input type="text" class="form-control form-control-sm" id="charHeight">
-                            </div>
-                            <div class="col-lg-1 col-md-1">
-                                <label class="form-label-compact">Peso</label>
-                                <input type="text" class="form-control form-control-sm" id="charWeight">
-                            </div>
-                            <div class="col-lg-1 col-md-1">
-                                <label class="form-label-compact">Carnagione</label>
-                                <input type="text" class="form-control form-control-sm" id="charSkin">
-                            </div>
-                        </div>
-                        <div class="row g-2">
-                            <div class="col-lg-3 col-md-3">
+                            <div class="col-2">
                                 <label class="form-label-compact">Background</label>
                                 <input type="text" class="form-control form-control-sm" id="charBackground">
                             </div>
-                            <div class="col-lg-1 col-md-1">
-                                <label class="form-label-compact">Allineam.</label>
+                            <div class="col-2">
+                                <label class="form-label-compact">Allineamento</label>
                                 <input type="text" class="form-control form-control-sm" id="charAlignment">
                             </div>
-                            <div class="col-lg-1 col-md-1">
+                            <div class="col-2">
+                                <label class="form-label-compact">Livello</label>
+                                <input type="number" class="form-control form-control-sm" id="charLevel" value="1">
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col">
                                 <label class="form-label-compact">Esperienza</label>
                                 <input type="number" class="form-control form-control-sm" id="charXP" value="0">
                             </div>
-                            <div class="col-lg-1 col-md-1">
+                            <div class="col">
+                                <label class="form-label-compact">Eta'</label>
+                                <input type="text" class="form-control form-control-sm" id="charAge">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact">Altezza</label>
+                                <input type="text" class="form-control form-control-sm" id="charHeight">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact">Peso</label>
+                                <input type="text" class="form-control form-control-sm" id="charWeight">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact">Carnagione</label>
+                                <input type="text" class="form-control form-control-sm" id="charSkin">
+                            </div>
+                            <div class="col">
                                 <label class="form-label-compact">Capelli</label>
                                 <input type="text" class="form-control form-control-sm" id="charHair">
                             </div>
-                            <div class="col-lg-1 col-md-1">
+                            <div class="col">
                                 <label class="form-label-compact">Occhi</label>
                                 <input type="text" class="form-control form-control-sm" id="charEyes">
                             </div>
@@ -221,23 +227,27 @@
                         <div class="card mb-2">
                             <div class="card-body p-2">
                                 <h6 class="mb-2 card-subtitle">TS CONTRO MORTE</h6>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label class="form-label-compact text-success fw-bold mb-1">SUCCESSI</label>
-                                        <div class="d-flex gap-1">
-                                            <input type="checkbox" class="death-save-success">
-                                            <input type="checkbox" class="death-save-success">
-                                            <input type="checkbox" class="death-save-success">
+                                <div class="death-saves-wrapper">
+                                    <i class="bi bi-heart-pulse-fill death-saves-icon"></i>
+                                    <div class="death-saves-row">
+                                        <div class="death-saves-group">
+                                            <span class="text-success fw-bold small">SUCCESSI</span>
+                                            <div class="d-flex gap-2">
+                                                <input type="checkbox" class="death-save-success" id="ds-success-1">
+                                                <input type="checkbox" class="death-save-success" id="ds-success-2">
+                                                <input type="checkbox" class="death-save-success" id="ds-success-3">
+                                            </div>
+                                        </div>
+                                        <div class="death-saves-group">
+                                            <span class="text-danger fw-bold small">FALLIMENTI</span>
+                                            <div class="d-flex gap-2">
+                                                <input type="checkbox" class="death-save-failure" id="ds-failure-1">
+                                                <input type="checkbox" class="death-save-failure" id="ds-failure-2">
+                                                <input type="checkbox" class="death-save-failure" id="ds-failure-3">
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-6">
-                                        <label class="form-label-compact text-danger fw-bold mb-1">FALLIMENTI</label>
-                                        <div class="d-flex gap-1">
-                                            <input type="checkbox" class="death-save-failure">
-                                            <input type="checkbox" class="death-save-failure">
-                                            <input type="checkbox" class="death-save-failure">
-                                        </div>
-                                    </div>
+                                    <i class="bi bi-heartbreak-fill death-saves-icon"></i>
                                 </div>
                             </div>
                         </div>
@@ -548,9 +558,14 @@
                     <!-- Right: Chat -->
                     <div class="party-chat-col">
                         <div class="card h-100 d-flex flex-column">
-                            <div class="card-header">CHAT DI PARTY</div>
-                            <div class="card-body p-0 d-flex flex-column flex-grow-1" style="position:relative; overflow:hidden;">
-                                <div class="chat-bg-image" style="background-image: url('./img/bgChat.png');"></div>
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>CHAT DI PARTY</span>
+                                <button class="btn btn-sm btn-secondary" id="chatBgBtn" title="Cambia sfondo chat">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                </button>
+                            </div>
+                            <div class="card-body p-0 d-flex flex-column flex-grow-1" style="position:relative; overflow:hidden; min-height: 0;">
+                                <div class="chat-bg-image" id="chatBgImage" style="background-image: url('./img/bgChat.png');"></div>
                                 <div class="chat-messages-area" id="chatMessages">
                                     <div class="chat-welcome-msg">
                                         <p>Benvenuto nella chat del Party!</p>
@@ -559,6 +574,7 @@
                                 </div>
                                 <div class="chat-input-area">
                                     <input type="file" id="chatImageInput" accept="image/*" style="display:none;">
+                                    <input type="file" id="chatBgInput" accept="image/*" style="display:none;">
                                     <button class="btn btn-sm chat-input-btn" id="chatImageBtn" title="Invia immagine">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                     </button>

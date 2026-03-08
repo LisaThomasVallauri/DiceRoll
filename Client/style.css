@@ -816,18 +816,70 @@ textarea.form-control {
 }
 
 /* Death Saves */
-.death-save-success {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-    accent-color: #5cb85c;
+.death-saves-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
 }
 
+.death-saves-icon {
+    font-size: 24px;
+    color: #4a4a5a;
+    opacity: 0.6;
+}
+
+.death-saves-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.death-saves-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.death-save-success,
 .death-save-failure {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     cursor: pointer;
-    accent-color: #d9534f;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 2px solid #3a3a4a;
+    border-radius: 4px;
+    background: #1a1a24;
+    transition: all 0.2s ease;
+}
+
+.death-save-success:hover {
+    border-color: #5cb85c;
+}
+
+.death-save-failure:hover {
+    border-color: #d9534f;
+}
+
+.death-save-success:checked {
+    background: #5cb85c;
+    border-color: #5cb85c;
+}
+
+.death-save-failure:checked {
+    background: #d9534f;
+    border-color: #d9534f;
+}
+
+.death-save-success:checked::after,
+.death-save-failure:checked::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+    background-size: 100% 100%;
 }
 
 /* Buttons */
@@ -1164,23 +1216,35 @@ textarea.form-control {
 
 /* Chat */
 .chat-bg-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.08;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
     z-index: 0;
     /* PLACEHOLDER: lo sfondo apparira' qui quando si inserisce l'immagine */
     background-color: #111118;
 }
 
+/* FIXED: Chat container con altezza fissa e scroll interno */
+.chat-container-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
 .chat-messages-area {
-    flex: 1;
+    flex: 1 1 0;
     overflow-y: auto;
     padding: 12px;
     display: flex;
@@ -1188,6 +1252,7 @@ textarea.form-control {
     gap: 6px;
     position: relative;
     z-index: 1;
+    min-height: 0;
 }
 
 .chat-welcome-msg {
@@ -1281,11 +1346,12 @@ textarea.form-control {
     border-radius: 6px;
     margin-top: 4px;
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s, transform 0.15s;
 }
 
 .chat-msg-image:hover {
     opacity: 0.85;
+    transform: scale(1.02);
 }
 
 /* Chat input area */
@@ -1294,20 +1360,27 @@ textarea.form-control {
     align-items: center;
     gap: 4px;
     padding: 8px 10px;
-    border-top: 1px solid #1e1e2a;
-    background: #0c0c12;
-    z-index: 1;
+    border-top: 1px solid rgba(30, 30, 42, 0.6);
+    background: rgba(12, 12, 18, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 2;
+    flex-shrink: 0;
+    position: relative;
 }
 
 .chat-input-btn {
     background: #1e1e2a;
     border: 1px solid #2a2a3a;
+    border-radius: 6px;
     color: #888;
-    padding: 5px 7px;
+    padding: 6px 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .chat-input-btn:hover {
@@ -1377,6 +1450,59 @@ textarea.form-control {
     border-color: #4a9eff;
 }
 
+/* ==================== IMAGE LIGHTBOX MODAL ==================== */
+.image-lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+
+.image-lightbox-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.image-lightbox-content {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    cursor: default;
+}
+
+.image-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.image-lightbox-close:hover {
+    background: rgba(255,255,255,0.2);
+}
+
 /* Responsive party */
 @media (max-width: 991px) {
     .party-layout {
@@ -1388,6 +1514,7 @@ textarea.form-control {
     }
     .chat-messages-area {
         min-height: 250px;
+        max-height: 350px;
     }
 }
 

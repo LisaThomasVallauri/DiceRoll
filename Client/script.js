@@ -1223,6 +1223,8 @@ function initializePartyChat() {
     const chatImageInput = document.getElementById('chatImageInput');
     const chatDiceBtn = document.getElementById('chatDiceBtn');
     const passwordToggle = document.getElementById('partyPasswordToggle');
+    const chatBgBtn = document.getElementById('chatBgBtn');
+    const chatBgInput = document.getElementById('chatBgInput');
     
     // Send message on Enter
     chatInput.addEventListener('keypress', function(e) {
@@ -1268,6 +1270,25 @@ function initializePartyChat() {
         } else {
             pwInput.type = 'password';
         }
+    });
+    
+    // Chat background button
+    chatBgBtn.addEventListener('click', function() {
+        chatBgInput.click();
+    });
+    
+    // Chat background upload handler
+    chatBgInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const chatBgImage = document.getElementById('chatBgImage');
+            chatBgImage.style.backgroundImage = `url('${ev.target.result}')`;
+        };
+        reader.readAsDataURL(file);
+        this.value = ''; // Reset so same file can be selected again
     });
     
     // Close dice popup on outside click
@@ -1321,7 +1342,7 @@ function addChatMessage(author, text, imageData, isSelf, diceData) {
     }
     
     if (imageData) {
-        content += `<img src="${imageData}" class="chat-msg-image" alt="Immagine condivisa" onclick="window.open(this.src, '_blank')">`;
+        content += `<img src="${imageData}" class="chat-msg-image" alt="Immagine condivisa" onclick="openLightbox('${imageData}')">`;
     }
     
     if (diceData) {
@@ -1380,6 +1401,37 @@ function createDicePopup() {
         });
     });
 }
+
+// ==================== IMAGE LIGHTBOX ====================
+function openLightbox(imageSrc) {
+    const lightbox = document.getElementById('imageLightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    lightboxImage.src = imageSrc;
+    lightbox.classList.add('visible');
+    
+    // Prevent body scroll when lightbox is open
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(event) {
+    // Close only if clicking on overlay or close button, not on the image itself
+    if (event.target.id === 'imageLightbox' || event.target.classList.contains('image-lightbox-close')) {
+        const lightbox = document.getElementById('imageLightbox');
+        lightbox.classList.remove('visible');
+        document.body.style.overflow = '';
+    }
+}
+
+// Close lightbox on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const lightbox = document.getElementById('imageLightbox');
+        if (lightbox.classList.contains('visible')) {
+            lightbox.classList.remove('visible');
+            document.body.style.overflow = '';
+        }
+    }
+});
 
 // Initialize party chat on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
