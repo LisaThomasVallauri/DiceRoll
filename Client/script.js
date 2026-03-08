@@ -54,6 +54,8 @@ document.addEventListener('DOMContentLoaded', function() {
     skills.forEach(skill => {
         skillScaling[skill.name] = skill.ability;
     });
+
+    initializePartyChat();   // <--- DEVE ESSERCI QUESTA RIGA
 });
 
 // ==================== ABILITIES ====================
@@ -1215,8 +1217,15 @@ function setAllData(data) {
     updateAllCalculations();
 }
 
-// ==================== PARTY CHAT ====================
+// ==================== PARTY CHAT (connessione al server) ====================
+
+let partySocket = null;
+let currentRoomPassword = null;
+let partyConnectionStatus = 'offline'; // 'offline', 'connecting', 'online'
+let isInRoom = false; // flag per evitare doppi join
+
 function initializePartyChat() {
+    console.log('initializePartyChat called');
     const chatInput = document.getElementById('chatInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
     const chatImageBtn = document.getElementById('chatImageBtn');
@@ -1225,131 +1234,329 @@ function initializePartyChat() {
     const passwordToggle = document.getElementById('partyPasswordToggle');
     const chatBgBtn = document.getElementById('chatBgBtn');
     const chatBgInput = document.getElementById('chatBgInput');
-    
-    // Send message on Enter
+    const btnCreateParty = document.getElementById('btnCreateParty');
+    const btnJoinParty = document.getElementById('btnJoinParty');
+
+    // Eventi UI locali
     chatInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') sendChatMessage();
     });
-    
-    // Send button
     chatSendBtn.addEventListener('click', sendChatMessage);
-    
-    // Image button
-    chatImageBtn.addEventListener('click', function() {
-        chatImageInput.click();
-    });
-    
-    // Image upload handler
-    chatImageInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            addChatMessage(getNickname(), null, ev.target.result, true);
-        };
-        reader.readAsDataURL(file);
-        this.value = ''; // Reset so same file can be selected again
-    });
-    
-    // Dice popup toggle
-    chatDiceBtn.addEventListener('click', function() {
-        const popup = document.getElementById('chatDicePopup');
-        if (!popup) {
-            createDicePopup();
-        } else {
-            popup.classList.toggle('visible');
-        }
-    });
-    
-    // Password toggle
-    passwordToggle.addEventListener('click', function() {
-        const pwInput = document.getElementById('partyPassword');
-        if (pwInput.type === 'password') {
-            pwInput.type = 'text';
-        } else {
-            pwInput.type = 'password';
-        }
-    });
-    
-    // Chat background button
-    chatBgBtn.addEventListener('click', function() {
-        chatBgInput.click();
-    });
-    
-    // Chat background upload handler
-    chatBgInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            const chatBgImage = document.getElementById('chatBgImage');
-            chatBgImage.style.backgroundImage = `url('${ev.target.result}')`;
-        };
-        reader.readAsDataURL(file);
-        this.value = ''; // Reset so same file can be selected again
-    });
-    
-    // Close dice popup on outside click
+    chatImageBtn.addEventListener('click', () => chatImageInput.click());
+    chatImageInput.addEventListener('change', handleChatImageUpload);
+    chatDiceBtn.addEventListener('click', toggleDicePopup);
+    passwordToggle.addEventListener('click', togglePasswordVisibility);
+    chatBgBtn.addEventListener('click', () => chatBgInput.click());
+    chatBgInput.addEventListener('change', handleChatBgUpload);
+    btnCreateParty.addEventListener('click', createParty);
+    btnJoinParty.addEventListener('click', joinParty);
+
+    // Chiudi popup dadi se clicchi fuori
     document.addEventListener('click', function(e) {
         const popup = document.getElementById('chatDicePopup');
         if (popup && !popup.contains(e.target) && e.target !== chatDiceBtn && !chatDiceBtn.contains(e.target)) {
             popup.classList.remove('visible');
         }
     });
+
+    // Connessione WebSocket automatica all'avvio
+    connectWebSocket();
 }
 
-function getNickname() {
-    return document.getElementById('partyNickname').value.trim() || 'Anonimo';
+// Stabilisce connessione WebSocket usando l'IP specificato dall'utente
+function connectWebSocket() {
+    const serverIPInput = document.getElementById('serverIP');
+    const serverIP = serverIPInput ? (serverIPInput.value.trim() || 'localhost') : 'localhost';
+    const url = `ws://${serverIP}:8765`;
+    
+    if (partySocket && (partySocket.readyState === WebSocket.OPEN || partySocket.readyState === WebSocket.CONNECTING)) {
+        return;
+    }
+    updatePartyStatus('connecting');
+    partySocket = new WebSocket(url);
+
+    partySocket.onopen = function() {
+        console.log('Connesso al server chat');
+        updatePartyStatus('online');
+    };
+
+    partySocket.onmessage = function(event) {
+        try {
+            const data = JSON.parse(event.data);
+            handleServerMessage(data);
+        } catch (e) {
+            console.error('Errore parsing messaggio server:', e);
+        }
+    };
+
+    partySocket.onclose = function(event) {
+        console.log('Disconnesso dal server', event.reason);
+        updatePartyStatus('offline');
+        partySocket = null;
+        currentRoomPassword = null;
+        isInRoom = false;
+        addSystemMessage('Connessione persa. Riprova più tardi.');
+        // Riabilita pulsanti
+        document.getElementById('btnCreateParty').disabled = false;
+        document.getElementById('btnJoinParty').disabled = false;
+    };
+
+    partySocket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+        updatePartyStatus('offline');
+        addSystemMessage('Errore di connessione al server.');
+        document.getElementById('btnCreateParty').disabled = false;
+        document.getElementById('btnJoinParty').disabled = false;
+    };
 }
 
+// Gestisce messaggi in arrivo dal server
+function handleServerMessage(data) {
+    switch (data.type) {
+        case 'created':
+            currentRoomPassword = document.getElementById('partyPassword').value.trim();
+            isInRoom = true;
+            addSystemMessage('Stanza creata con successo! Sei il creatore.');
+            break;
+        case 'joined':
+            currentRoomPassword = document.getElementById('partyPassword').value.trim();
+            isInRoom = true;
+            addSystemMessage(`Sei entrato nella stanza. Utenti presenti: ${(data.users || []).join(', ')}`);
+            break;
+        case 'chat':
+            // Mostra il messaggio (il mittente non lo riceve, quindi nessun duplicato)
+            addChatMessage(data.nickname, data.text, data.image, false, data.dice);
+            break;
+        case 'system':
+            addSystemMessage(data.message);
+            break;
+        case 'closed':
+            addSystemMessage('La stanza è stata chiusa: ' + (data.reason || 'motivo sconosciuto.'));
+            currentRoomPassword = null;
+            isInRoom = false;
+            updatePartyStatus('online');
+            break;
+        case 'error':
+            addSystemMessage('Errore: ' + data.message);
+            break;
+        default:
+            console.warn('Messaggio sconosciuto dal server:', data);
+    }
+    // Riabilita pulsanti dopo la risposta
+    document.getElementById('btnCreateParty').disabled = false;
+    document.getElementById('btnJoinParty').disabled = false;
+}
+
+// Aggiorna indicatore di stato nella UI
+function updatePartyStatus(status) {
+    partyConnectionStatus = status;
+    const statusDot = document.querySelector('.party-status-dot');
+    const statusText = document.querySelector('.party-status-text');
+    if (!statusDot || !statusText) return;
+
+    if (status === 'online') {
+        statusDot.className = 'party-status-dot online';
+        statusText.textContent = currentRoomPassword ? `Connesso (stanza: ${currentRoomPassword})` : 'Connesso';
+    } else if (status === 'connecting') {
+        statusDot.className = 'party-status-dot offline';
+        statusText.textContent = 'Connessione in corso...';
+    } else {
+        statusDot.className = 'party-status-dot offline';
+        statusText.textContent = 'Non connesso';
+    }
+}
+
+// Aggiunge un messaggio di sistema alla chat (locale, non inviato)
+function addSystemMessage(text) {
+    const messagesArea = document.getElementById('chatMessages');
+    const welcomeMsg = messagesArea.querySelector('.chat-welcome-msg');
+    if (welcomeMsg) welcomeMsg.remove();
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'chat-msg system';
+    msgDiv.innerHTML = `<div class="chat-msg-text"><i>${escapeHtml(text)}</i></div>`;
+    messagesArea.appendChild(msgDiv);
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+// Invia messaggio chat (testo o comando)
 function sendChatMessage() {
     const chatInput = document.getElementById('chatInput');
     const text = chatInput.value.trim();
     if (!text) return;
-    
-    // Check for dice command
+
+    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
+        addSystemMessage('Non connesso al server. Attendi o riconnettiti.');
+        return;
+    }
+
     if (text.startsWith('/roll ') || text.startsWith('/r ')) {
         const diceCmd = text.replace(/^\/(roll|r)\s+/, '');
         try {
             const result = interpretDiceCommand(diceCmd);
-            addChatMessage(getNickname(), null, null, true, { command: diceCmd, result: result });
+            partySocket.send(JSON.stringify({
+                type: 'message',
+                text: '',
+                dice: { command: diceCmd, result: result }
+            }));
+            // Mostra subito il risultato localmente (non arriverà dal server)
+            addChatMessage(getNickname(), '', null, true, { command: diceCmd, result: result });
         } catch (err) {
-            addChatMessage('Sistema', 'Comando dado non valido: ' + err.message, null, false);
+            addSystemMessage('Comando dado non valido: ' + err.message);
         }
     } else {
+        partySocket.send(JSON.stringify({
+            type: 'message',
+            text: text
+        }));
+        // Mostra subito il messaggio locale
         addChatMessage(getNickname(), text, null, true);
     }
-    
+
     chatInput.value = '';
 }
 
+// Gestisce upload immagine chat
+function handleChatImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
+        addSystemMessage('Non connesso al server.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        const imageData = ev.target.result;
+        partySocket.send(JSON.stringify({
+            type: 'message',
+            image: imageData
+        }));
+        // Mostra subito l'immagine localmente
+        addChatMessage(getNickname(), null, imageData, true);
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+}
+
+// Crea una nuova stanza
+function createParty() {
+    console.log('createParty called');
+    if (isInRoom) {
+        addSystemMessage('Sei già in una stanza. Esci prima di crearne una nuova.');
+        return;
+    }
+
+    const btn = document.getElementById('btnCreateParty');
+    btn.disabled = true;
+
+    const nickname = document.getElementById('partyNickname').value.trim();
+    const password = document.getElementById('partyPassword').value.trim();
+
+    if (!nickname) {
+        addSystemMessage('Inserisci un nickname.');
+        btn.disabled = false;
+        return;
+    }
+    if (!password) {
+        addSystemMessage('Inserisci una password per la stanza.');
+        btn.disabled = false;
+        return;
+    }
+
+    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
+        connectWebSocket();
+        partySocket.addEventListener('open', function onOpen() {
+            partySocket.removeEventListener('open', onOpen);
+            partySocket.send(JSON.stringify({
+                type: 'create',
+                nickname: nickname,
+                password: password
+            }));
+        }, { once: true });
+    } else {
+        partySocket.send(JSON.stringify({
+            type: 'create',
+            nickname: nickname,
+            password: password
+        }));
+    }
+
+    // Timeout di sicurezza per riabilitare il pulsante
+    setTimeout(() => { btn.disabled = false; }, 3000);
+}
+
+// Unisciti a una stanza esistente
+function joinParty() {
+    console.log('joinParty called');
+    if (isInRoom) {
+        addSystemMessage('Sei già in una stanza. Esci prima di unirti a un\'altra.');
+        return;
+    }
+
+    const btn = document.getElementById('btnJoinParty');
+    btn.disabled = true;
+
+    const nickname = document.getElementById('partyNickname').value.trim();
+    const password = document.getElementById('partyPassword').value.trim();
+
+    if (!nickname) {
+        addSystemMessage('Inserisci un nickname.');
+        btn.disabled = false;
+        return;
+    }
+    if (!password) {
+        addSystemMessage('Inserisci la password della stanza.');
+        btn.disabled = false;
+        return;
+    }
+
+    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
+        connectWebSocket();
+        partySocket.addEventListener('open', function onOpen() {
+            partySocket.removeEventListener('open', onOpen);
+            partySocket.send(JSON.stringify({
+                type: 'join',
+                nickname: nickname,
+                password: password
+            }));
+        }, { once: true });
+    } else {
+        partySocket.send(JSON.stringify({
+            type: 'join',
+            nickname: nickname,
+            password: password
+        }));
+    }
+
+    setTimeout(() => { btn.disabled = false; }, 3000);
+}
+
+// Aggiunge un messaggio alla UI (locale, dopo invio o ricezione)
 function addChatMessage(author, text, imageData, isSelf, diceData) {
     const messagesArea = document.getElementById('chatMessages');
-    
-    // Remove welcome message if present
     const welcomeMsg = messagesArea.querySelector('.chat-welcome-msg');
     if (welcomeMsg) welcomeMsg.remove();
-    
+
     const msgDiv = document.createElement('div');
     msgDiv.className = `chat-msg ${isSelf ? 'self' : 'other'}`;
-    
+
     let content = `<div class="chat-msg-author">${escapeHtml(author)}</div>`;
-    
+
     if (text) {
         content += `<p class="chat-msg-text">${escapeHtml(text)}</p>`;
     }
-    
+
     if (imageData) {
         content += `<img src="${imageData}" class="chat-msg-image" alt="Immagine condivisa" onclick="openLightbox('${imageData}')">`;
     }
-    
+
     if (diceData) {
         content += `
             <div class="chat-msg-dice">
                 <span class="chat-dice-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="currentColor"/><circle cx="8" cy="16" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
                 </span>
                 <div>
                     <div class="chat-dice-result">${escapeHtml(diceData.result)}</div>
@@ -1358,82 +1565,73 @@ function addChatMessage(author, text, imageData, isSelf, diceData) {
             </div>
         `;
     }
-    
+
     msgDiv.innerHTML = content;
     messagesArea.appendChild(msgDiv);
     messagesArea.scrollTop = messagesArea.scrollHeight;
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+// Funzioni helper
+function togglePasswordVisibility() {
+    const pwInput = document.getElementById('partyPassword');
+    pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
+}
+
+function handleChatBgUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        document.getElementById('chatBgImage').style.backgroundImage = `url('${ev.target.result}')`;
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+}
+
+function toggleDicePopup() {
+    let popup = document.getElementById('chatDicePopup');
+    if (!popup) {
+        createDicePopup();
+        popup = document.getElementById('chatDicePopup');
+    }
+    popup.classList.toggle('visible');
 }
 
 function createDicePopup() {
     const chatInputArea = document.querySelector('.chat-input-area');
     const popup = document.createElement('div');
     popup.id = 'chatDicePopup';
-    popup.className = 'chat-dice-popup visible';
-    
+    popup.className = 'chat-dice-popup';
+
     const diceTypes = ['1d4', '1d6', '1d8', '1d10', '1d12', '1d20', '1d100', '2d6'];
-    
+
     popup.innerHTML = `
         <div class="chat-dice-popup-title">Tira Dadi</div>
         <div class="chat-dice-popup-grid">
             ${diceTypes.map(d => `<button class="chat-dice-popup-btn" data-dice="${d}">${d}</button>`).join('')}
         </div>
     `;
-    
+
     chatInputArea.style.position = 'relative';
     chatInputArea.appendChild(popup);
-    
+
     popup.querySelectorAll('.chat-dice-popup-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const dice = this.dataset.dice;
-            try {
-                const result = interpretDiceCommand(dice);
-                addChatMessage(getNickname(), null, null, true, { command: dice, result: result });
-            } catch (err) {
-                // ignore
-            }
+            document.getElementById('chatInput').value = '/roll ' + dice;
+            sendChatMessage();
             popup.classList.remove('visible');
         });
     });
 }
 
-// ==================== IMAGE LIGHTBOX ====================
-function openLightbox(imageSrc) {
-    const lightbox = document.getElementById('imageLightbox');
-    const lightboxImage = document.getElementById('lightboxImage');
-    lightboxImage.src = imageSrc;
-    lightbox.classList.add('visible');
-    
-    // Prevent body scroll when lightbox is open
-    document.body.style.overflow = 'hidden';
+function getNickname() {
+    return document.getElementById('partyNickname').value.trim() || 'Anonimo';
 }
 
-function closeLightbox(event) {
-    // Close only if clicking on overlay or close button, not on the image itself
-    if (event.target.id === 'imageLightbox' || event.target.classList.contains('image-lightbox-close')) {
-        const lightbox = document.getElementById('imageLightbox');
-        lightbox.classList.remove('visible');
-        document.body.style.overflow = '';
-    }
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
-
-// Close lightbox on Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        const lightbox = document.getElementById('imageLightbox');
-        if (lightbox.classList.contains('visible')) {
-            lightbox.classList.remove('visible');
-            document.body.style.overflow = '';
-        }
-    }
-});
-
-// Initialize party chat on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function() {
-    initializePartyChat();
-});
