@@ -81,7 +81,6 @@ class Room:
             if client == exclude:
                 continue
             try:
-                # websocket.send è asincrono, ma in un loop normale dobbiamo usare asyncio.create_task
                 asyncio.create_task(client.websocket.send(message_str))
             except Exception as e:
                 logger.warning(f"Impossibile inviare a {client.nickname}: {e}")
@@ -104,11 +103,15 @@ class Server:
     
     def unregister_client(self, websocket):
         client = self.clients.pop(websocket, None)
-        if client and client.room:
-            should_close = client.room.remove_client(client)
-            if should_close and client.room.password in self.rooms:
-                del self.rooms[client.room.password]
-                logger.info(f"Stanza '{client.room.password}' chiusa (vuota)")
+        if client:
+            if client.room:
+                room = client.room
+                should_close = room.remove_client(client)
+                if should_close and room.password in self.rooms:
+                    del self.rooms[room.password]
+                    logger.info(f"Stanza '{room.password}' chiusa (vuota)")
+            else:
+                logger.info(f"Client {client.nickname} disconnesso senza stanza")
         return client
     
     def create_room(self, password: str, client: Client) -> Optional[Room]:
@@ -133,10 +136,11 @@ class Server:
     def leave_room(self, client: Client):
         if not client or not client.room:
             return
-        should_close = client.room.remove_client(client)
-        if should_close and client.room.password in self.rooms:
-            del self.rooms[client.room.password]
-            logger.info(f"Stanza '{client.room.password}' chiusa (vuota)")
+        room = client.room                     # Salva riferimento
+        should_close = room.remove_client(client)
+        if should_close and room.password in self.rooms:
+            del self.rooms[room.password]
+            logger.info(f"Stanza '{room.password}' chiusa (vuota)")
 
 # === Istanza globale ===
 server = Server()
@@ -169,6 +173,8 @@ async def handle_message(websocket, message):
         await handle_create(websocket, data)
     elif msg_type == 'join':
         await handle_join(websocket, data)
+    elif msg_type == 'leave':
+        await handle_leave(websocket, data)
     elif msg_type == 'message':
         await handle_chat(websocket, data)
     elif msg_type == 'ping':
@@ -229,6 +235,35 @@ async def handle_join(websocket, data):
     }, exclude=client)
     
     logger.info(f"✅ {nickname} si è unito a '{password}'")
+
+async def handle_leave(websocket, data):
+    client = server.get_client(websocket)
+    if not client or not client.room:
+        await websocket.send(json.dumps({'type': 'error', 'message': 'Non sei in una stanza'}))
+        return
+    
+    room = client.room
+    nickname = client.nickname
+    logger.info(f"👋 {nickname} sta lasciando la stanza '{room.password}'")
+    
+    # Rimuovi il client dalla stanza
+    server.leave_room(client)
+    
+    # Conferma al client che ha lasciato
+    await websocket.send(json.dumps({
+        'type': 'left',
+        'message': 'Sei uscito dalla stanza'
+    }))
+    
+    # Notifica agli altri nella stanza (se non vuota)
+    if not room.is_empty():
+        room.broadcast({
+            'type': 'system',
+            'message': f"{nickname} ha lasciato la stanza"
+        }, exclude=client)
+    else:
+        # La stanza è già stata rimossa da leave_room
+        logger.info(f"Stanza '{room.password}' chiusa perché vuota")
 
 async def handle_chat(websocket, data):
     client = server.get_client(websocket)

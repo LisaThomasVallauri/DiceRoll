@@ -31,6 +31,15 @@ let currentImageIndex = 0;
 let dmImages = [];
 let currentDMImageIndex = 0;
 
+// ==================== PARTY CHAT VARIABLES ====================
+let partySocket = null;
+let currentRoomPassword = null;
+let partyConnectionStatus = 'offline';
+let isInRoom = false;
+let reconnectAttempts = 0;
+let reconnectTimer = null;
+let pendingAction = null;   // per azioni in attesa di connessione
+
 // Initialize the sheet
 document.addEventListener('DOMContentLoaded', function() {
     initializeAbilities();
@@ -1219,13 +1228,6 @@ function setAllData(data) {
 
 // ==================== PARTY CHAT - VERSIONE CORRETTA ====================
 
-let partySocket = null;
-let currentRoomPassword = null;
-let partyConnectionStatus = 'offline';
-let isInRoom = false;
-let reconnectAttempts = 0;
-let reconnectTimer = null;
-
 function initializePartyChat() {
     console.log('initializePartyChat START');
     
@@ -1239,10 +1241,12 @@ function initializePartyChat() {
     const chatBgInput = document.getElementById('chatBgInput');
     const btnCreateParty = document.getElementById('btnCreateParty');
     const btnJoinParty = document.getElementById('btnJoinParty');
+    const btnLeaveParty = document.getElementById('btnLeaveParty');   // NUOVO
     
     // Controllo che gli elementi esistano
     if (!btnCreateParty) console.error('btnCreateParty non trovato!');
     if (!btnJoinParty) console.error('btnJoinParty non trovato!');
+    if (!btnLeaveParty) console.error('btnLeaveParty non trovato!');
     if (!chatInput) console.error('chatInput non trovato!');
     
     // Event listeners
@@ -1272,6 +1276,14 @@ function initializePartyChat() {
         });
     }
     
+    // NUOVO: Listener per il bottone Esci
+    if (btnLeaveParty) {
+        btnLeaveParty.addEventListener('click', function(e) {
+            e.preventDefault();
+            leaveParty();
+        });
+    }
+    
     document.addEventListener('click', function(e) {
         const popup = document.getElementById('chatDicePopup');
         if (popup && !popup.contains(e.target) && e.target !== chatDiceBtn && !chatDiceBtn?.contains(e.target)) {
@@ -1282,7 +1294,33 @@ function initializePartyChat() {
     console.log('initializePartyChat COMPLETATO');
 }
 
-// Funzione di connessione MIGLIORATA
+// NUOVA FUNZIONE: Aggiorna lo stato dei bottoni in base a connessione e stanza
+function updatePartyUI() {
+    const btnCreate = document.getElementById('btnCreateParty');
+    const btnJoin = document.getElementById('btnJoinParty');
+    const btnLeave = document.getElementById('btnLeaveParty');
+    
+    if (!btnCreate || !btnJoin || !btnLeave) return;
+    
+    if (partyConnectionStatus === 'online' && isInRoom) {
+        // Connesso e dentro una stanza
+        btnCreate.disabled = true;
+        btnJoin.disabled = true;
+        btnLeave.disabled = false;
+    } else if (partyConnectionStatus === 'online' && !isInRoom) {
+        // Connesso al server ma non in stanza
+        btnCreate.disabled = false;
+        btnJoin.disabled = false;
+        btnLeave.disabled = true;
+    } else {
+        // Non connesso
+        btnCreate.disabled = false;
+        btnJoin.disabled = false;
+        btnLeave.disabled = true;
+    }
+}
+
+// Funzione di connessione (modificata per chiamare updatePartyUI)
 function connectWebSocket() {
     const serverIPInput = document.getElementById('serverIP');
     if (!serverIPInput) {
@@ -1297,7 +1335,6 @@ function connectWebSocket() {
         console.log('IP non inserito, uso localhost');
     }
     
-    // Rimuovi eventuali http:// o ws://
     serverIP = serverIP.replace(/^https?:\/\//, '').replace(/^ws:\/\//, '').split('/')[0];
     
     const url = `ws://${serverIP}:8765`;
@@ -1327,6 +1364,7 @@ function connectWebSocket() {
         console.error('Errore nella creazione del WebSocket:', err);
         addSystemMessage('Errore: URL non valido');
         updatePartyStatus('offline');
+        updatePartyUI();
         return;
     }
     
@@ -1335,6 +1373,7 @@ function connectWebSocket() {
         updatePartyStatus('online');
         addSystemMessage('Connesso al server');
         reconnectAttempts = 0;
+        updatePartyUI();
         
         if (pendingAction) {
             console.log('Eseguo azione in sospeso:', pendingAction.type);
@@ -1365,11 +1404,11 @@ function connectWebSocket() {
         partySocket = null;
         currentRoomPassword = null;
         isInRoom = false;
+        updatePartyUI();
         
-        if (event.code !== 1000) { // 1000 = chiusura normale
+        if (event.code !== 1000) {
             addSystemMessage(`Connessione persa (codice ${event.code}).`);
             
-            // Riconnessione automatica (solo se non è stata una chiusura volontaria)
             if (reconnectAttempts < 3) {
                 reconnectAttempts++;
                 const delay = reconnectAttempts * 2000;
@@ -1384,25 +1423,47 @@ function connectWebSocket() {
         
         document.getElementById('btnCreateParty').disabled = false;
         document.getElementById('btnJoinParty').disabled = false;
+        // btnLeave già disabilitato da updatePartyUI
     };
     
     partySocket.onerror = function(error) {
         console.error('WebSocket error:', error);
-        // Non aggiungere messaggio qui perché onclose verrà chiamato subito dopo
     };
 }
 
+function resetChatMessages() {
+    const messagesArea = document.getElementById('chatMessages');
+    if (!messagesArea) return;
+    messagesArea.innerHTML = `
+        <div class="chat-welcome-msg">
+            <p>Benvenuto nella chat del Party!</p>
+            <p class="small">Puoi inviare messaggi, tirare dadi con /roll (es: /roll 2d6+3) o condividere immagini.</p>
+        </div>
+    `;
+}
+
+
+// Gestione messaggi dal server (MODIFICATA per gestire 'left')
 function handleServerMessage(data) {
     switch (data.type) {
         case 'created':
             currentRoomPassword = document.getElementById('partyPassword').value.trim();
             isInRoom = true;
             addSystemMessage('✅ Stanza creata con successo!');
+            updatePartyUI();
             break;
         case 'joined':
             currentRoomPassword = document.getElementById('partyPassword').value.trim();
             isInRoom = true;
             addSystemMessage(`✅ Entrato nella stanza. Presenti: ${(data.users || []).join(', ')}`);
+            updatePartyUI();
+            break;
+        case 'left':   // Conferma di uscita dalla stanza
+            isInRoom = false;
+            currentRoomPassword = null;
+            addSystemMessage('👋 Sei uscito dal party.');
+            resetChatMessages();          // <--- PULISCE LA CHAT
+            updatePartyUI();
             break;
         case 'chat':
             addChatMessage(data.nickname, data.text, data.image, false, data.dice);
@@ -1414,6 +1475,8 @@ function handleServerMessage(data) {
             addSystemMessage('🔒 Stanza chiusa: ' + (data.reason || ''));
             currentRoomPassword = null;
             isInRoom = false;
+            resetChatMessages();          // <--- PULISCE LA CHAT ANCHE IN CASO DI CHIUSURA
+            updatePartyUI();
             break;
         case 'error':
             addSystemMessage('❌ ' + data.message);
@@ -1424,6 +1487,7 @@ function handleServerMessage(data) {
     
     document.getElementById('btnCreateParty').disabled = false;
     document.getElementById('btnJoinParty').disabled = false;
+    // updatePartyUI già chiamato nei casi opportuni
 }
 
 function createParty() {
@@ -1504,6 +1568,30 @@ function joinParty() {
             password: password
         }));
     }
+}
+
+// NUOVA FUNZIONE: Uscire dal party
+function leaveParty() {
+    console.log('leaveParty CLICCATO');
+    
+    if (!isInRoom) {
+        addSystemMessage('⚠️ Non sei in una stanza');
+        return;
+    }
+    
+    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
+        addSystemMessage('❌ Non connesso al server');
+        return;
+    }
+    
+    document.getElementById('btnLeaveParty').disabled = true;
+    
+    partySocket.send(JSON.stringify({
+        type: 'leave'
+    }));
+    
+    // Non resettiamo subito isInRoom, aspettiamo la conferma dal server (tipo 'left')
+    addSystemMessage('⏳ Richiesta di uscita inviata...');
 }
 
 function sendChatMessage() {
@@ -1627,6 +1715,7 @@ function updatePartyStatus(status) {
         statusDot.className = 'party-status-dot offline';
         statusText.textContent = 'Non connesso';
     }
+    updatePartyUI();
 }
 
 function togglePasswordVisibility() {
