@@ -1309,6 +1309,7 @@ textarea.form-control {
 
 .chat-msg-text {
     margin: 0;
+    color: #ddd;
 }
 
 /* Chat dice result */
