@@ -1,262 +1,275 @@
 #!/usr/bin/env python3
 """
-Server WebSocket per la chat di Party della scheda D&D.
-Gestisce stanze protette da password, con scadenza automatica.
-Ascolta su tutte le interfacce (0.0.0.0) per accettare connessioni da altri PC.
+Server WebSocket per la chat di Party - Versione Corretta e Testata
 """
 
 import asyncio
 import json
 import logging
+import uuid
+import socket
 from datetime import datetime
 from typing import Dict, Optional
 
 import websockets
-from websockets import WebSocketServerProtocol
 
-# Configurazione logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# === Modelli dati ===
+# === Modelli con ID univoci ===
+class Client:
+    def __init__(self, websocket, nickname: str):
+        self.id = str(uuid.uuid4())[:8]
+        self.websocket = websocket
+        self.nickname = nickname
+        self.room = None
+        self.connected_at = datetime.now()
+    
+    def __eq__(self, other):
+        return self.id == other.id if other else False
+
 class Room:
-    """Rappresenta una stanza di chat."""
-    def __init__(self, password: str, creator: WebSocketServerProtocol, creator_nickname: str):
+    def __init__(self, password: str, creator: Client):
+        self.id = str(uuid.uuid4())[:8]
         self.password = password
-        self.creator = creator
-        self.creator_nickname = creator_nickname
-        self.clients: Dict[WebSocketServerProtocol, str] = {creator: creator_nickname}
+        self.creator_id = creator.id
+        self.creator_nickname = creator.nickname
+        self.clients: Dict[str, Client] = {creator.id: creator}
+        self.created_at = datetime.now()
         self.last_active = datetime.now()
-        self.cleanup_task: Optional[asyncio.Task] = None
-
-    def is_empty(self) -> bool:
+        creator.room = self
+        logger.info(f"🏠 Stanza creata: '{password}' (ID: {self.id}) da {creator.nickname}")
+    
+    @property
+    def client_count(self):
+        return len(self.clients)
+    
+    @property
+    def client_list(self):
+        return [c.nickname for c in self.clients.values()]
+    
+    def add_client(self, client: Client) -> bool:
+        if client.nickname in [c.nickname for c in self.clients.values()]:
+            return False
+        self.clients[client.id] = client
+        client.room = self
+        self.last_active = datetime.now()
+        return True
+    
+    def remove_client(self, client: Client) -> bool:
+        if client.id not in self.clients:
+            return False
+        del self.clients[client.id]
+        client.room = None
+        self.last_active = datetime.now()
+        return self.is_empty()
+    
+    def is_empty(self):
         return len(self.clients) == 0
-
-    def add_client(self, websocket: WebSocketServerProtocol, nickname: str) -> None:
-        self.clients[websocket] = nickname
-        self.last_active = datetime.now()
-
-    def remove_client(self, websocket: WebSocketServerProtocol) -> Optional[str]:
-        nickname = self.clients.pop(websocket, None)
-        if nickname:
-            self.last_active = datetime.now()
-        return nickname
-
-    def broadcast(self, message: dict, exclude: Optional[WebSocketServerProtocol] = None) -> None:
+    
+    def is_creator(self, client: Client) -> bool:
+        return client.id == self.creator_id
+    
+    def broadcast(self, message: dict, exclude: Optional[Client] = None):
+        """Invia a tutti tranne exclude. Gestisce connessioni chiuse."""
         if not self.clients:
             return
+        
         message_str = json.dumps(message)
-        recipients = [ws for ws in self.clients.keys() if ws != exclude]
-        if recipients:
-            websockets.broadcast(recipients, message_str)
+        
+        for client in self.clients.values():
+            if client == exclude:
+                continue
+            try:
+                # websocket.send è asincrono, ma in un loop normale dobbiamo usare asyncio.create_task
+                asyncio.create_task(client.websocket.send(message_str))
+            except Exception as e:
+                logger.warning(f"Impossibile inviare a {client.nickname}: {e}")
 
-    def is_creator(self, websocket: WebSocketServerProtocol) -> bool:
-        return websocket == self.creator
-
-# === Gestione stanze ===
-class RoomManager:
+# === Gestione server ===
+class Server:
     def __init__(self):
         self.rooms: Dict[str, Room] = {}
-        self.client_room: Dict[WebSocketServerProtocol, Room] = {}
-        self.cleanup_interval = 300  # 5 minuti
-
-    def create_room(self, password: str, creator: WebSocketServerProtocol, creator_nickname: str) -> Optional[Room]:
+        self.clients: Dict[websockets.WebSocketServerProtocol, Client] = {}
+    
+    def get_client(self, websocket) -> Optional[Client]:
+        return self.clients.get(websocket)
+    
+    def register_client(self, websocket, nickname: str) -> Client:
+        if websocket in self.clients:
+            return self.clients[websocket]
+        client = Client(websocket, nickname)
+        self.clients[websocket] = client
+        return client
+    
+    def unregister_client(self, websocket):
+        client = self.clients.pop(websocket, None)
+        if client and client.room:
+            should_close = client.room.remove_client(client)
+            if should_close and client.room.password in self.rooms:
+                del self.rooms[client.room.password]
+                logger.info(f"Stanza '{client.room.password}' chiusa (vuota)")
+        return client
+    
+    def create_room(self, password: str, client: Client) -> Optional[Room]:
         if password in self.rooms:
             return None
-        # Se il creatore è già in una stanza, lo rimuoviamo (dovrebbe essere gestito dal client)
-        if creator in self.client_room:
-            self.leave_room(creator)
-        room = Room(password, creator, creator_nickname)
+        if client.room:
+            self.leave_room(client)
+        room = Room(password, client)
         self.rooms[password] = room
-        self.client_room[creator] = room
-        logger.info(f"Stanza creata con password '{password}' da {creator_nickname}")
         return room
-
-    def join_room(self, password: str, joiner: WebSocketServerProtocol, joiner_nickname: str) -> Optional[Room]:
+    
+    def join_room(self, password: str, client: Client) -> Optional[Room]:
         room = self.rooms.get(password)
         if not room:
             return None
-
-        # Controllo nickname duplicato
-        if joiner_nickname in room.clients.values():
-            # Invia errore al joiner
-            asyncio.create_task(joiner.send(json.dumps({
-                'type': 'error',
-                'message': 'Nickname già in uso in questa stanza'
-            })))
-            return None
-
-        # Se il joiner era già in un'altra stanza, lo rimuoviamo
-        if joiner in self.client_room:
-            self.leave_room(joiner)
-
-        room.add_client(joiner, joiner_nickname)
-        self.client_room[joiner] = room
-        logger.info(f"{joiner_nickname} si è unito alla stanza '{password}'")
-        room.broadcast({
-            'type': 'system',
-            'message': f"{joiner_nickname} si è unito alla stanza."
-        }, exclude=joiner)
-        return room
-
-    def leave_room(self, websocket: WebSocketServerProtocol) -> Optional[Room]:
-        room = self.client_room.pop(websocket, None)
-        if not room:
-            return None
-
-        nickname = room.remove_client(websocket)
-        logger.info(f"{nickname} ha lasciato la stanza '{room.password}'")
-
-        # Se era il creatore, chiudi la stanza immediatamente
-        if room.is_creator(websocket):
-            logger.info(f"Il creatore {nickname} ha lasciato la stanza '{room.password}': chiusura stanza.")
-            self._close_room(room.password, reason="Il creatore ha abbandonato.")
-            return None
-
-        # Se la stanza è vuota, programma la cancellazione dopo 5 minuti
-        if room.is_empty():
-            self._schedule_room_cleanup(room)
-        else:
-            room.broadcast({
-                'type': 'system',
-                'message': f"{nickname} ha lasciato la stanza."
-            })
-
-        return room
-
-    def _schedule_room_cleanup(self, room: Room) -> None:
-        async def cleanup():
-            await asyncio.sleep(self.cleanup_interval)
-            if room.is_empty():
-                logger.info(f"Stanza '{room.password}' vuota da 5 minuti: eliminazione.")
-                self._close_room(room.password, reason="Stanza vuota da 5 minuti.")
-            else:
-                room.cleanup_task = None
-
-        if room.cleanup_task and not room.cleanup_task.done():
-            room.cleanup_task.cancel()
-        room.cleanup_task = asyncio.create_task(cleanup())
-
-    def _close_room(self, password: str, reason: str = "") -> None:
-        room = self.rooms.pop(password, None)
-        if not room:
+        if client.room:
+            self.leave_room(client)
+        if room.add_client(client):
+            return room
+        return None
+    
+    def leave_room(self, client: Client):
+        if not client or not client.room:
             return
+        should_close = client.room.remove_client(client)
+        if should_close and client.room.password in self.rooms:
+            del self.rooms[client.room.password]
+            logger.info(f"Stanza '{client.room.password}' chiusa (vuota)")
 
-        # Invia messaggio di chiusura a tutti i client
-        for ws in list(room.clients.keys()):
-            try:
-                asyncio.create_task(ws.send(json.dumps({
-                    'type': 'closed',
-                    'reason': reason
-                })))
-            except:
-                pass
-            finally:
-                self.client_room.pop(ws, None)
-                asyncio.create_task(ws.close(1000, reason))
+# === Istanza globale ===
+server = Server()
 
-        if room.cleanup_task and not room.cleanup_task.done():
-            room.cleanup_task.cancel()
+# === Handlers ===
+async def handler(websocket):
+    client_addr = websocket.remote_address[0]
+    logger.info(f"🔌 Nuova connessione da {client_addr}")
+    
+    try:
+        async for message in websocket:
+            await handle_message(websocket, message)
+    except websockets.exceptions.ConnectionClosed as e:
+        logger.info(f"👋 Connessione chiusa: {client_addr} - {e.code}")
+    except Exception as e:
+        logger.error(f"Errore nella connessione: {e}")
+    finally:
+        server.unregister_client(websocket)
 
-    def get_room_by_client(self, websocket: WebSocketServerProtocol) -> Optional[Room]:
-        return self.client_room.get(websocket)
+async def handle_message(websocket, message):
+    try:
+        data = json.loads(message)
+        msg_type = data.get('type')
+        logger.info(f"📨 Ricevuto: {msg_type} da {websocket.remote_address[0]}")
+    except json.JSONDecodeError:
+        await websocket.send(json.dumps({'type': 'error', 'message': 'JSON non valido'}))
+        return
+    
+    if msg_type == 'create':
+        await handle_create(websocket, data)
+    elif msg_type == 'join':
+        await handle_join(websocket, data)
+    elif msg_type == 'message':
+        await handle_chat(websocket, data)
+    elif msg_type == 'ping':
+        await websocket.send(json.dumps({'type': 'pong'}))
+    else:
+        await websocket.send(json.dumps({'type': 'error', 'message': 'Tipo sconosciuto'}))
 
-# === Gestione connessioni WebSocket ===
-class ChatServer:
-    def __init__(self):
-        self.room_manager = RoomManager()
+async def handle_create(websocket, data):
+    nickname = data.get('nickname', '').strip()
+    password = data.get('password', '').strip()
+    
+    if not nickname or not password:
+        await websocket.send(json.dumps({'type': 'error', 'message': 'Nickname e password obbligatori'}))
+        return
+    
+    client = server.register_client(websocket, nickname)
+    room = server.create_room(password, client)
+    
+    if not room:
+        await websocket.send(json.dumps({'type': 'error', 'message': 'Password già in uso'}))
+        return
+    
+    await websocket.send(json.dumps({
+        'type': 'created',
+        'room_password': password,
+        'users': room.client_list,
+        'is_creator': True
+    }))
+    
+    logger.info(f"✅ Stanza '{password}' creata da {nickname}")
 
-    async def handler(self, websocket: WebSocketServerProtocol):
-        logger.info(f"Nuova connessione da {websocket.remote_address}")
-        try:
-            async for message in websocket:
-                await self.handle_message(websocket, message)
-        except websockets.exceptions.ConnectionClosedOK:
-            logger.info(f"Connessione chiusa normalmente da {websocket.remote_address}")
-        except websockets.exceptions.ConnectionClosedError as e:
-            logger.info(f"Connessione chiusa con errore da {websocket.remote_address}: {e}")
-        finally:
-            self.room_manager.leave_room(websocket)
-            logger.info(f"Connessione terminata: {websocket.remote_address}")
+async def handle_join(websocket, data):
+    nickname = data.get('nickname', '').strip()
+    password = data.get('password', '').strip()
+    
+    if not nickname or not password:
+        await websocket.send(json.dumps({'type': 'error', 'message': 'Nickname e password obbligatori'}))
+        return
+    
+    client = server.register_client(websocket, nickname)
+    room = server.join_room(password, client)
+    
+    if not room:
+        await websocket.send(json.dumps({'type': 'error', 'message': 'Stanza non trovata o nickname già in uso'}))
+        return
+    
+    await websocket.send(json.dumps({
+        'type': 'joined',
+        'room_password': password,
+        'users': room.client_list,
+        'is_creator': room.is_creator(client)
+    }))
+    
+    # Notifica agli altri
+    room.broadcast({
+        'type': 'system',
+        'message': f"{nickname} si è unito alla stanza"
+    }, exclude=client)
+    
+    logger.info(f"✅ {nickname} si è unito a '{password}'")
 
-    async def handle_message(self, websocket: WebSocketServerProtocol, message: str):
-        try:
-            data = json.loads(message)
-            msg_type = data.get('type')
-        except json.JSONDecodeError:
-            await websocket.send(json.dumps({'type': 'error', 'message': 'Formato JSON non valido'}))
-            return
+async def handle_chat(websocket, data):
+    client = server.get_client(websocket)
+    if not client or not client.room:
+        await websocket.send(json.dumps({'type': 'error', 'message': 'Non sei in una stanza'}))
+        return
+    
+    # Invia a tutti tranne al mittente
+    client.room.broadcast({
+        'type': 'chat',
+        'nickname': client.nickname,
+        'text': data.get('text', ''),
+        'image': data.get('image'),
+        'dice': data.get('dice'),
+        'timestamp': datetime.now().isoformat()
+    }, exclude=client)
 
-        if msg_type == 'create':
-            await self.handle_create(websocket, data)
-        elif msg_type == 'join':
-            await self.handle_join(websocket, data)
-        elif msg_type == 'message':
-            await self.handle_chat_message(websocket, data)
-        elif msg_type == 'ping':
-            await websocket.send(json.dumps({'type': 'pong'}))
-        else:
-            await websocket.send(json.dumps({'type': 'error', 'message': 'Tipo messaggio sconosciuto'}))
-
-    async def handle_create(self, websocket: WebSocketServerProtocol, data: dict):
-        password = data.get('password', '').strip()
-        nickname = data.get('nickname', '').strip()
-        if not password or not nickname:
-            await websocket.send(json.dumps({'type': 'error', 'message': 'Password e nickname obbligatori'}))
-            return
-        room = self.room_manager.create_room(password, websocket, nickname)
-        if not room:
-            await websocket.send(json.dumps({'type': 'error', 'message': 'Password già in uso'}))
-            return
-        await websocket.send(json.dumps({
-            'type': 'created',
-            'success': True,
-            'message': f'Stanza "{password}" creata con successo.'
-        }))
-
-    async def handle_join(self, websocket: WebSocketServerProtocol, data: dict):
-        password = data.get('password', '').strip()
-        nickname = data.get('nickname', '').strip()
-        if not password or not nickname:
-            await websocket.send(json.dumps({'type': 'error', 'message': 'Password e nickname obbligatori'}))
-            return
-        room = self.room_manager.join_room(password, websocket, nickname)
-        if not room:
-            # Se il motivo è nickname duplicato, l'errore è già stato inviato
-            return
-        await websocket.send(json.dumps({
-            'type': 'joined',
-            'success': True,
-            'message': f'Connesso alla stanza "{password}".',
-            'users': list(room.clients.values())
-        }))
-
-    async def handle_chat_message(self, websocket: WebSocketServerProtocol, data: dict):
-        room = self.room_manager.get_room_by_client(websocket)
-        if not room:
-            await websocket.send(json.dumps({'type': 'error', 'message': 'Non sei in nessuna stanza'}))
-            return
-        nickname = room.clients.get(websocket, 'Sconosciuto')
-        out_msg = {
-            'type': 'chat',
-            'nickname': nickname,
-            'text': data.get('text', ''),
-            'image': data.get('image'),
-            'dice': data.get('dice'),
-            'timestamp': datetime.now().isoformat()
-        }
-        # Invia a tutti tranne al mittente
-        room.broadcast(out_msg, exclude=websocket)
-
-# === Avvio server ===
+# === Avvio ===
 async def main():
-    server = ChatServer()
-    async with websockets.serve(server.handler, "0.0.0.0", 8765):
-        logger.info("Server WebSocket avviato su ws://0.0.0.0:8765 (accessibile da altri PC sulla rete)")
-        await asyncio.Future()  # run forever
+    HOST = "0.0.0.0"
+    PORT = 8765
+    
+    # Ottieni IP locale
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    
+    print("\n" + "="*60)
+    print("🚀 SERVER CHAT D&D - AVVIATO")
+    print("="*60)
+    print(f"📡 In ascolto su: {HOST}:{PORT}")
+    print(f"🌐 IP locale del server: {local_ip}")
+    print(f"\n📌 I client devono connettersi a: {local_ip}")
+    print("="*60 + "\n")
+    
+    async with websockets.serve(handler, HOST, PORT):
+        await asyncio.Future()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n👋 Server fermato")
+    except Exception as e:
+        print(f"🔥 Errore: {e}")

@@ -1217,15 +1217,18 @@ function setAllData(data) {
     updateAllCalculations();
 }
 
-// ==================== PARTY CHAT (connessione al server) ====================
+// ==================== PARTY CHAT - VERSIONE CORRETTA ====================
 
 let partySocket = null;
 let currentRoomPassword = null;
-let partyConnectionStatus = 'offline'; // 'offline', 'connecting', 'online'
-let isInRoom = false; // flag per evitare doppi join
+let partyConnectionStatus = 'offline';
+let isInRoom = false;
+let reconnectAttempts = 0;
+let reconnectTimer = null;
 
 function initializePartyChat() {
-    console.log('initializePartyChat called');
+    console.log('initializePartyChat START');
+    
     const chatInput = document.getElementById('chatInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
     const chatImageBtn = document.getElementById('chatImageBtn');
@@ -1236,142 +1239,334 @@ function initializePartyChat() {
     const chatBgInput = document.getElementById('chatBgInput');
     const btnCreateParty = document.getElementById('btnCreateParty');
     const btnJoinParty = document.getElementById('btnJoinParty');
-
-    // Eventi UI locali
-    chatInput.addEventListener('keypress', function(e) {
+    
+    // Controllo che gli elementi esistano
+    if (!btnCreateParty) console.error('btnCreateParty non trovato!');
+    if (!btnJoinParty) console.error('btnJoinParty non trovato!');
+    if (!chatInput) console.error('chatInput non trovato!');
+    
+    // Event listeners
+    if (chatInput) chatInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') sendChatMessage();
     });
-    chatSendBtn.addEventListener('click', sendChatMessage);
-    chatImageBtn.addEventListener('click', () => chatImageInput.click());
-    chatImageInput.addEventListener('change', handleChatImageUpload);
-    chatDiceBtn.addEventListener('click', toggleDicePopup);
-    passwordToggle.addEventListener('click', togglePasswordVisibility);
-    chatBgBtn.addEventListener('click', () => chatBgInput.click());
-    chatBgInput.addEventListener('change', handleChatBgUpload);
-    btnCreateParty.addEventListener('click', createParty);
-    btnJoinParty.addEventListener('click', joinParty);
-
-    // Chiudi popup dadi se clicchi fuori
+    
+    if (chatSendBtn) chatSendBtn.addEventListener('click', sendChatMessage);
+    if (chatImageBtn) chatImageBtn.addEventListener('click', () => chatImageInput?.click());
+    if (chatImageInput) chatImageInput.addEventListener('change', handleChatImageUpload);
+    if (chatDiceBtn) chatDiceBtn.addEventListener('click', toggleDicePopup);
+    if (passwordToggle) passwordToggle.addEventListener('click', togglePasswordVisibility);
+    if (chatBgBtn) chatBgBtn.addEventListener('click', () => chatBgInput?.click());
+    if (chatBgInput) chatBgInput.addEventListener('change', handleChatBgUpload);
+    
+    if (btnCreateParty) {
+        btnCreateParty.addEventListener('click', function(e) {
+            e.preventDefault();
+            createParty();
+        });
+    }
+    
+    if (btnJoinParty) {
+        btnJoinParty.addEventListener('click', function(e) {
+            e.preventDefault();
+            joinParty();
+        });
+    }
+    
     document.addEventListener('click', function(e) {
         const popup = document.getElementById('chatDicePopup');
-        if (popup && !popup.contains(e.target) && e.target !== chatDiceBtn && !chatDiceBtn.contains(e.target)) {
+        if (popup && !popup.contains(e.target) && e.target !== chatDiceBtn && !chatDiceBtn?.contains(e.target)) {
             popup.classList.remove('visible');
         }
     });
-
-    // Connessione WebSocket automatica all'avvio
-    connectWebSocket();
+    
+    console.log('initializePartyChat COMPLETATO');
 }
 
-// Stabilisce connessione WebSocket usando l'IP specificato dall'utente
+// Funzione di connessione MIGLIORATA
 function connectWebSocket() {
     const serverIPInput = document.getElementById('serverIP');
-    const serverIP = serverIPInput ? (serverIPInput.value.trim() || 'localhost') : 'localhost';
-    const url = `ws://${serverIP}:8765`;
-    
-    if (partySocket && (partySocket.readyState === WebSocket.OPEN || partySocket.readyState === WebSocket.CONNECTING)) {
+    if (!serverIPInput) {
+        console.error('Campo serverIP non trovato!');
+        addSystemMessage('Errore: campo IP Server mancante');
         return;
     }
+    
+    let serverIP = serverIPInput.value.trim();
+    if (!serverIP) {
+        serverIP = 'localhost';
+        console.log('IP non inserito, uso localhost');
+    }
+    
+    // Rimuovi eventuali http:// o ws://
+    serverIP = serverIP.replace(/^https?:\/\//, '').replace(/^ws:\/\//, '').split('/')[0];
+    
+    const url = `ws://${serverIP}:8765`;
+    console.log('Tentativo di connessione a:', url);
+    
+    if (partySocket) {
+        if (partySocket.readyState === WebSocket.OPEN || partySocket.readyState === WebSocket.CONNECTING) {
+            if (partySocket.url === url || partySocket.url === url + '/') {
+                console.log('Già connesso a', url);
+                return;
+            } else {
+                console.log('Chiusura connessione esistente a', partySocket.url);
+                partySocket.close();
+                partySocket = null;
+            }
+        } else {
+            partySocket = null;
+        }
+    }
+    
     updatePartyStatus('connecting');
-    partySocket = new WebSocket(url);
-
+    addSystemMessage(`Connessione a ${serverIP}...`);
+    
+    try {
+        partySocket = new WebSocket(url);
+    } catch (err) {
+        console.error('Errore nella creazione del WebSocket:', err);
+        addSystemMessage('Errore: URL non valido');
+        updatePartyStatus('offline');
+        return;
+    }
+    
     partySocket.onopen = function() {
-        console.log('Connesso al server chat');
+        console.log('✅ Connesso al server');
         updatePartyStatus('online');
+        addSystemMessage('Connesso al server');
+        reconnectAttempts = 0;
+        
+        if (pendingAction) {
+            console.log('Eseguo azione in sospeso:', pendingAction.type);
+            const action = pendingAction;
+            pendingAction = null;
+            
+            partySocket.send(JSON.stringify({
+                type: action.type,
+                nickname: action.nickname,
+                password: action.password
+            }));
+        }
     };
-
+    
     partySocket.onmessage = function(event) {
         try {
             const data = JSON.parse(event.data);
+            console.log('📨 Ricevuto:', data.type);
             handleServerMessage(data);
         } catch (e) {
-            console.error('Errore parsing messaggio server:', e);
+            console.error('Errore parsing:', e);
         }
     };
-
+    
     partySocket.onclose = function(event) {
-        console.log('Disconnesso dal server', event.reason);
+        console.log('❌ Disconnesso dal server', event.code, event.reason);
         updatePartyStatus('offline');
         partySocket = null;
         currentRoomPassword = null;
         isInRoom = false;
-        addSystemMessage('Connessione persa. Riprova più tardi.');
-        // Riabilita pulsanti
+        
+        if (event.code !== 1000) { // 1000 = chiusura normale
+            addSystemMessage(`Connessione persa (codice ${event.code}).`);
+            
+            // Riconnessione automatica (solo se non è stata una chiusura volontaria)
+            if (reconnectAttempts < 3) {
+                reconnectAttempts++;
+                const delay = reconnectAttempts * 2000;
+                addSystemMessage(`Tentativo di riconnessione tra ${delay/1000}s...`);
+                
+                if (reconnectTimer) clearTimeout(reconnectTimer);
+                reconnectTimer = setTimeout(() => {
+                    connectWebSocket();
+                }, delay);
+            }
+        }
+        
         document.getElementById('btnCreateParty').disabled = false;
         document.getElementById('btnJoinParty').disabled = false;
     };
-
+    
     partySocket.onerror = function(error) {
         console.error('WebSocket error:', error);
-        updatePartyStatus('offline');
-        addSystemMessage('Errore di connessione al server.');
-        document.getElementById('btnCreateParty').disabled = false;
-        document.getElementById('btnJoinParty').disabled = false;
+        // Non aggiungere messaggio qui perché onclose verrà chiamato subito dopo
     };
 }
 
-// Gestisce messaggi in arrivo dal server
 function handleServerMessage(data) {
     switch (data.type) {
         case 'created':
             currentRoomPassword = document.getElementById('partyPassword').value.trim();
             isInRoom = true;
-            addSystemMessage('Stanza creata con successo! Sei il creatore.');
+            addSystemMessage('✅ Stanza creata con successo!');
             break;
         case 'joined':
             currentRoomPassword = document.getElementById('partyPassword').value.trim();
             isInRoom = true;
-            addSystemMessage(`Sei entrato nella stanza. Utenti presenti: ${(data.users || []).join(', ')}`);
+            addSystemMessage(`✅ Entrato nella stanza. Presenti: ${(data.users || []).join(', ')}`);
             break;
         case 'chat':
-            // Mostra il messaggio (il mittente non lo riceve, quindi nessun duplicato)
             addChatMessage(data.nickname, data.text, data.image, false, data.dice);
             break;
         case 'system':
-            addSystemMessage(data.message);
+            addSystemMessage('🔔 ' + data.message);
             break;
         case 'closed':
-            addSystemMessage('La stanza è stata chiusa: ' + (data.reason || 'motivo sconosciuto.'));
+            addSystemMessage('🔒 Stanza chiusa: ' + (data.reason || ''));
             currentRoomPassword = null;
             isInRoom = false;
-            updatePartyStatus('online');
             break;
         case 'error':
-            addSystemMessage('Errore: ' + data.message);
+            addSystemMessage('❌ ' + data.message);
             break;
         default:
-            console.warn('Messaggio sconosciuto dal server:', data);
+            console.log('Messaggio sconosciuto:', data);
     }
-    // Riabilita pulsanti dopo la risposta
+    
     document.getElementById('btnCreateParty').disabled = false;
     document.getElementById('btnJoinParty').disabled = false;
 }
 
-// Aggiorna indicatore di stato nella UI
-function updatePartyStatus(status) {
-    partyConnectionStatus = status;
-    const statusDot = document.querySelector('.party-status-dot');
-    const statusText = document.querySelector('.party-status-text');
-    if (!statusDot || !statusText) return;
-
-    if (status === 'online') {
-        statusDot.className = 'party-status-dot online';
-        statusText.textContent = currentRoomPassword ? `Connesso (stanza: ${currentRoomPassword})` : 'Connesso';
-    } else if (status === 'connecting') {
-        statusDot.className = 'party-status-dot offline';
-        statusText.textContent = 'Connessione in corso...';
+function createParty() {
+    console.log('createParty CLICCATO');
+    
+    const nickname = document.getElementById('partyNickname').value.trim();
+    const password = document.getElementById('partyPassword').value.trim();
+    
+    if (!nickname) {
+        addSystemMessage('❌ Inserisci un nickname');
+        return;
+    }
+    if (!password) {
+        addSystemMessage('❌ Inserisci una password');
+        return;
+    }
+    
+    if (isInRoom) {
+        addSystemMessage('⚠️ Sei già in una stanza');
+        return;
+    }
+    
+    document.getElementById('btnCreateParty').disabled = true;
+    
+    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
+        console.log('Nessuna connessione aperta, salvo azione pending');
+        pendingAction = {
+            type: 'create',
+            nickname: nickname,
+            password: password
+        };
+        connectWebSocket();
     } else {
-        statusDot.className = 'party-status-dot offline';
-        statusText.textContent = 'Non connesso';
+        console.log('Invio comando CREATE');
+        partySocket.send(JSON.stringify({
+            type: 'create',
+            nickname: nickname,
+            password: password
+        }));
     }
 }
 
-// Aggiunge un messaggio di sistema alla chat (locale, non inviato)
+function joinParty() {
+    console.log('joinParty CLICCATO');
+    
+    const nickname = document.getElementById('partyNickname').value.trim();
+    const password = document.getElementById('partyPassword').value.trim();
+    
+    if (!nickname) {
+        addSystemMessage('❌ Inserisci un nickname');
+        return;
+    }
+    if (!password) {
+        addSystemMessage('❌ Inserisci la password');
+        return;
+    }
+    
+    if (isInRoom) {
+        addSystemMessage('⚠️ Sei già in una stanza');
+        return;
+    }
+    
+    document.getElementById('btnJoinParty').disabled = true;
+    
+    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
+        console.log('Nessuna connessione aperta, salvo azione pending');
+        pendingAction = {
+            type: 'join',
+            nickname: nickname,
+            password: password
+        };
+        connectWebSocket();
+    } else {
+        console.log('Invio comando JOIN');
+        partySocket.send(JSON.stringify({
+            type: 'join',
+            nickname: nickname,
+            password: password
+        }));
+    }
+}
+
+function sendChatMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const text = chatInput.value.trim();
+    if (!text) return;
+    
+    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
+        addSystemMessage('❌ Non connesso al server');
+        return;
+    }
+    
+    if (text.startsWith('/roll ') || text.startsWith('/r ')) {
+        const diceCmd = text.replace(/^\/(roll|r)\s+/, '');
+        try {
+            const result = interpretDiceCommand(diceCmd);
+            partySocket.send(JSON.stringify({
+                type: 'message',
+                dice: { command: diceCmd, result: result }
+            }));
+            addChatMessage(getNickname(), '', null, true, { command: diceCmd, result: result });
+        } catch (err) {
+            addSystemMessage('❌ ' + err.message);
+        }
+    } else {
+        partySocket.send(JSON.stringify({
+            type: 'message',
+            text: text
+        }));
+        addChatMessage(getNickname(), text, null, true);
+    }
+    
+    chatInput.value = '';
+}
+
+function handleChatImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
+        addSystemMessage('❌ Non connesso al server');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        partySocket.send(JSON.stringify({
+            type: 'message',
+            image: ev.target.result
+        }));
+        addChatMessage(getNickname(), null, ev.target.result, true);
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+}
+
 function addSystemMessage(text) {
     const messagesArea = document.getElementById('chatMessages');
+    if (!messagesArea) return;
+    
     const welcomeMsg = messagesArea.querySelector('.chat-welcome-msg');
     if (welcomeMsg) welcomeMsg.remove();
-
+    
     const msgDiv = document.createElement('div');
     msgDiv.className = 'chat-msg system';
     msgDiv.innerHTML = `<div class="chat-msg-text"><i>${escapeHtml(text)}</i></div>`;
@@ -1379,185 +1574,30 @@ function addSystemMessage(text) {
     messagesArea.scrollTop = messagesArea.scrollHeight;
 }
 
-// Invia messaggio chat (testo o comando)
-function sendChatMessage() {
-    const chatInput = document.getElementById('chatInput');
-    const text = chatInput.value.trim();
-    if (!text) return;
-
-    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
-        addSystemMessage('Non connesso al server. Attendi o riconnettiti.');
-        return;
-    }
-
-    if (text.startsWith('/roll ') || text.startsWith('/r ')) {
-        const diceCmd = text.replace(/^\/(roll|r)\s+/, '');
-        try {
-            const result = interpretDiceCommand(diceCmd);
-            partySocket.send(JSON.stringify({
-                type: 'message',
-                text: '',
-                dice: { command: diceCmd, result: result }
-            }));
-            // Mostra subito il risultato localmente (non arriverà dal server)
-            addChatMessage(getNickname(), '', null, true, { command: diceCmd, result: result });
-        } catch (err) {
-            addSystemMessage('Comando dado non valido: ' + err.message);
-        }
-    } else {
-        partySocket.send(JSON.stringify({
-            type: 'message',
-            text: text
-        }));
-        // Mostra subito il messaggio locale
-        addChatMessage(getNickname(), text, null, true);
-    }
-
-    chatInput.value = '';
-}
-
-// Gestisce upload immagine chat
-function handleChatImageUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
-        addSystemMessage('Non connesso al server.');
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-        const imageData = ev.target.result;
-        partySocket.send(JSON.stringify({
-            type: 'message',
-            image: imageData
-        }));
-        // Mostra subito l'immagine localmente
-        addChatMessage(getNickname(), null, imageData, true);
-    };
-    reader.readAsDataURL(file);
-    event.target.value = '';
-}
-
-// Crea una nuova stanza
-function createParty() {
-    console.log('createParty called');
-    if (isInRoom) {
-        addSystemMessage('Sei già in una stanza. Esci prima di crearne una nuova.');
-        return;
-    }
-
-    const btn = document.getElementById('btnCreateParty');
-    btn.disabled = true;
-
-    const nickname = document.getElementById('partyNickname').value.trim();
-    const password = document.getElementById('partyPassword').value.trim();
-
-    if (!nickname) {
-        addSystemMessage('Inserisci un nickname.');
-        btn.disabled = false;
-        return;
-    }
-    if (!password) {
-        addSystemMessage('Inserisci una password per la stanza.');
-        btn.disabled = false;
-        return;
-    }
-
-    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
-        connectWebSocket();
-        partySocket.addEventListener('open', function onOpen() {
-            partySocket.removeEventListener('open', onOpen);
-            partySocket.send(JSON.stringify({
-                type: 'create',
-                nickname: nickname,
-                password: password
-            }));
-        }, { once: true });
-    } else {
-        partySocket.send(JSON.stringify({
-            type: 'create',
-            nickname: nickname,
-            password: password
-        }));
-    }
-
-    // Timeout di sicurezza per riabilitare il pulsante
-    setTimeout(() => { btn.disabled = false; }, 3000);
-}
-
-// Unisciti a una stanza esistente
-function joinParty() {
-    console.log('joinParty called');
-    if (isInRoom) {
-        addSystemMessage('Sei già in una stanza. Esci prima di unirti a un\'altra.');
-        return;
-    }
-
-    const btn = document.getElementById('btnJoinParty');
-    btn.disabled = true;
-
-    const nickname = document.getElementById('partyNickname').value.trim();
-    const password = document.getElementById('partyPassword').value.trim();
-
-    if (!nickname) {
-        addSystemMessage('Inserisci un nickname.');
-        btn.disabled = false;
-        return;
-    }
-    if (!password) {
-        addSystemMessage('Inserisci la password della stanza.');
-        btn.disabled = false;
-        return;
-    }
-
-    if (!partySocket || partySocket.readyState !== WebSocket.OPEN) {
-        connectWebSocket();
-        partySocket.addEventListener('open', function onOpen() {
-            partySocket.removeEventListener('open', onOpen);
-            partySocket.send(JSON.stringify({
-                type: 'join',
-                nickname: nickname,
-                password: password
-            }));
-        }, { once: true });
-    } else {
-        partySocket.send(JSON.stringify({
-            type: 'join',
-            nickname: nickname,
-            password: password
-        }));
-    }
-
-    setTimeout(() => { btn.disabled = false; }, 3000);
-}
-
-// Aggiunge un messaggio alla UI (locale, dopo invio o ricezione)
 function addChatMessage(author, text, imageData, isSelf, diceData) {
     const messagesArea = document.getElementById('chatMessages');
+    if (!messagesArea) return;
+    
     const welcomeMsg = messagesArea.querySelector('.chat-welcome-msg');
     if (welcomeMsg) welcomeMsg.remove();
-
+    
     const msgDiv = document.createElement('div');
     msgDiv.className = `chat-msg ${isSelf ? 'self' : 'other'}`;
-
+    
     let content = `<div class="chat-msg-author">${escapeHtml(author)}</div>`;
-
+    
     if (text) {
         content += `<p class="chat-msg-text">${escapeHtml(text)}</p>`;
     }
-
+    
     if (imageData) {
-        content += `<img src="${imageData}" class="chat-msg-image" alt="Immagine condivisa" onclick="openLightbox('${imageData}')">`;
+        content += `<img src="${imageData}" class="chat-msg-image" onclick="openLightbox('${imageData}')">`;
     }
-
+    
     if (diceData) {
         content += `
             <div class="chat-msg-dice">
-                <span class="chat-dice-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="currentColor"/><circle cx="8" cy="16" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
-                </span>
+                <span class="chat-dice-icon">🎲</span>
                 <div>
                     <div class="chat-dice-result">${escapeHtml(diceData.result)}</div>
                     <div class="chat-dice-detail">${escapeHtml(diceData.command)}</div>
@@ -1565,24 +1605,42 @@ function addChatMessage(author, text, imageData, isSelf, diceData) {
             </div>
         `;
     }
-
+    
     msgDiv.innerHTML = content;
     messagesArea.appendChild(msgDiv);
     messagesArea.scrollTop = messagesArea.scrollHeight;
 }
 
-// Funzioni helper
+function updatePartyStatus(status) {
+    partyConnectionStatus = status;
+    const statusDot = document.querySelector('.party-status-dot');
+    const statusText = document.querySelector('.party-status-text');
+    if (!statusDot || !statusText) return;
+    
+    if (status === 'online') {
+        statusDot.className = 'party-status-dot online';
+        statusText.textContent = currentRoomPassword ? `Connesso (${currentRoomPassword})` : 'Connesso';
+    } else if (status === 'connecting') {
+        statusDot.className = 'party-status-dot offline';
+        statusText.textContent = 'Connessione...';
+    } else {
+        statusDot.className = 'party-status-dot offline';
+        statusText.textContent = 'Non connesso';
+    }
+}
+
 function togglePasswordVisibility() {
     const pwInput = document.getElementById('partyPassword');
-    pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
+    if (pwInput) pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
 }
 
 function handleChatBgUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(ev) {
-        document.getElementById('chatBgImage').style.backgroundImage = `url('${ev.target.result}')`;
+    reader.onload = (ev) => {
+        const bg = document.getElementById('chatBgImage');
+        if (bg) bg.style.backgroundImage = `url('${ev.target.result}')`;
     };
     reader.readAsDataURL(file);
     event.target.value = '';
@@ -1594,27 +1652,29 @@ function toggleDicePopup() {
         createDicePopup();
         popup = document.getElementById('chatDicePopup');
     }
-    popup.classList.toggle('visible');
+    if (popup) popup.classList.toggle('visible');
 }
 
 function createDicePopup() {
     const chatInputArea = document.querySelector('.chat-input-area');
+    if (!chatInputArea) return;
+    
     const popup = document.createElement('div');
     popup.id = 'chatDicePopup';
     popup.className = 'chat-dice-popup';
-
+    
     const diceTypes = ['1d4', '1d6', '1d8', '1d10', '1d12', '1d20', '1d100', '2d6'];
-
+    
     popup.innerHTML = `
         <div class="chat-dice-popup-title">Tira Dadi</div>
         <div class="chat-dice-popup-grid">
             ${diceTypes.map(d => `<button class="chat-dice-popup-btn" data-dice="${d}">${d}</button>`).join('')}
         </div>
     `;
-
+    
     chatInputArea.style.position = 'relative';
     chatInputArea.appendChild(popup);
-
+    
     popup.querySelectorAll('.chat-dice-popup-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const dice = this.dataset.dice;
@@ -1626,7 +1686,7 @@ function createDicePopup() {
 }
 
 function getNickname() {
-    return document.getElementById('partyNickname').value.trim() || 'Anonimo';
+    return document.getElementById('partyNickname')?.value.trim() || 'Anonimo';
 }
 
 function escapeHtml(text) {
