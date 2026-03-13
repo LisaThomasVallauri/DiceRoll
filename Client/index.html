@@ -23,6 +23,48 @@
         <img id="lightboxImage" class="image-lightbox-content" src="" alt="Immagine ingrandita">
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="settings-modal-overlay" onclick="closeSettingsModal(event)">
+        <div class="settings-modal-box" onclick="event.stopPropagation()">
+            <div class="settings-modal-header">
+                <span class="settings-modal-title">Impostazioni</span>
+                <button class="settings-modal-close" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <div class="settings-modal-body">
+                <!-- Day / Night Mode -->
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <span class="settings-row-label">Modalità</span>
+                        <span class="settings-row-desc" id="themeLabel">Night Mode</span>
+                    </div>
+                    <label class="settings-switch">
+                        <input type="checkbox" id="themeToggle" onchange="toggleTheme(this)">
+                        <span class="settings-switch-track">
+                            <span class="settings-switch-icon settings-switch-icon--off">🌙</span>
+                            <span class="settings-switch-icon settings-switch-icon--on">☀️</span>
+                            <span class="settings-switch-thumb"></span>
+                        </span>
+                    </label>
+                </div>
+                <!-- Language -->
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <span class="settings-row-label">Lingua</span>
+                        <span class="settings-row-desc" id="langLabel">Italiano</span>
+                    </div>
+                    <label class="settings-switch">
+                        <input type="checkbox" id="langToggle" onchange="toggleLang(this)">
+                        <span class="settings-switch-track">
+                            <span class="settings-switch-icon settings-switch-icon--off">🇮🇹</span>
+                            <span class="settings-switch-icon settings-switch-icon--on">🇬🇧</span>
+                            <span class="settings-switch-thumb"></span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid p-3">
         <!-- Tabs Navigation with Action Buttons -->
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -46,11 +88,17 @@
                     <button class="nav-link" id="party-tab" data-bs-toggle="tab" data-bs-target="#party" type="button">PARTY</button>
                 </li>
             </ul>
-            <div class="ms-3 d-flex gap-2">
+            <div class="ms-3 d-flex gap-2 align-items-center">
                 <button class="btn btn-danger btn-sm" onclick="resetSheet()">Reset</button>
                 <button class="btn btn-info btn-sm" onclick="loadData()">Carica</button>
                 <button class="btn btn-success btn-sm" onclick="saveData()">Salva</button>
                 <button class="btn btn-success btn-sm" onclick="saveDataAs()">Salva Nome</button>
+                <button class="btn btn-settings" onclick="openSettingsModal()" title="Impostazioni" aria-label="Impostazioni">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -602,3 +650,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+

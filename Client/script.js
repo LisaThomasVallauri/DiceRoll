@@ -40,8 +40,43 @@ let reconnectAttempts = 0;
 let reconnectTimer = null;
 let pendingAction = null;   // per azioni in attesa di connessione
 
+// ==================== SETTINGS MODAL ====================
+function openSettingsModal() {
+    document.getElementById('settingsModal').classList.add('visible');
+}
+
+function closeSettingsModal(event) {
+    if (!event || event.target === document.getElementById('settingsModal')) {
+        document.getElementById('settingsModal').classList.remove('visible');
+    }
+}
+
+function toggleTheme(checkbox) {
+    const isDayMode = checkbox.checked;
+    document.body.classList.toggle('day-mode', isDayMode);
+    document.getElementById('themeLabel').textContent = isDayMode ? 'Day Mode' : 'Night Mode';
+    try { localStorage.setItem('dnd_theme', isDayMode ? 'day' : 'night'); } catch(e) {}
+}
+
+function toggleLang(checkbox) {
+    document.getElementById('langLabel').textContent = checkbox.checked ? 'English' : 'Italiano';
+    // Funzionalità lingua non implementata
+}
+
 // Initialize the sheet
 document.addEventListener('DOMContentLoaded', function() {
+    // Restore saved theme
+    try {
+        const savedTheme = localStorage.getItem('dnd_theme');
+        if (savedTheme === 'day') {
+            document.body.classList.add('day-mode');
+            const toggle = document.getElementById('themeToggle');
+            if (toggle) {
+                toggle.checked = true;
+                document.getElementById('themeLabel').textContent = 'Day Mode';
+            }
+        }
+    } catch(e) {}
     initializeAbilities();
     initializeSaves();
     initializeSkills();
