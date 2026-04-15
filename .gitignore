@@ -1,0 +1,22 @@
+# Dipendenze
+node_modules/
+client/node_modules/
+
+# Cartelle di Build
+out/
+client/out/
+dist/
+
+# File di sistema e log
+*.log
+.DS_Store
+Thumbs.db
+
+# File di configurazione di Electron non necessari su Git
+.eslintcache
+
+# Escludi cartelle di release e file compressi
+releases/
+*.zip
+*.rar
+*.7z

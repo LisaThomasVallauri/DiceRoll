@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheda del Personaggio D&D</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="./img/icon.png">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display:none;">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <span class="spinner-text" data-i18n="loading.text">Caricamento...</span>
+        </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div id="imageLightbox" class="image-lightbox-overlay" onclick="closeLightbox(event)">
+        <button class="image-lightbox-close" onclick="closeLightbox(event)">&times;</button>
+        <img id="lightboxImage" class="image-lightbox-content" src="" alt="Immagine ingrandita">
+    </div>
+
+    <!-- Restore Backup Modal -->
+    <div id="restoreBackupModal" class="settings-modal-overlay" onclick="closeRestoreBackupModal(event)">
+        <div class="settings-modal-box load-confirm-box" onclick="event.stopPropagation()">
+            <div class="settings-modal-header">
+                <span class="settings-modal-title" data-i18n="alerts.restoreModalTitle">💾 Salvataggio automatico</span>
+                <button class="settings-modal-close" onclick="closeRestoreBackupModal()">&times;</button>
+            </div>
+            <div class="load-confirm-body">
+                <p class="load-confirm-msg" data-i18n="alerts.restoreModalMsg">Trovato un salvataggio automatico. Vuoi ripristinarlo?</p>
+            </div>
+            <div class="load-confirm-footer">
+                <button class="btn btn-success btn-sm load-confirm-btn" id="restoreBackupConfirm" onclick="confirmRestoreBackup()" data-i18n="alerts.restoreModalConfirm">✅ Ripristina il salvataggio</button>
+                <button class="btn btn-secondary btn-sm load-confirm-btn" onclick="closeRestoreBackupModal()" data-i18n="alerts.restoreModalDismiss">🗑 Ignora e ricomincia</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="settings-modal-overlay" onclick="closeSettingsModal(event)">
+        <div class="settings-modal-box" onclick="event.stopPropagation()">
+            <div class="settings-modal-header">
+                <span class="settings-modal-title" data-i18n="settings.title">Impostazioni</span>
+                <button class="settings-modal-close" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <div class="settings-modal-body">
+                <!-- Day / Night Mode -->
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <span class="settings-row-label" data-i18n="settings.mode">Modalità</span>
+                        <span class="settings-row-desc" id="themeLabel">Night Mode</span>
+                    </div>
+                    <label class="settings-switch">
+                        <input type="checkbox" id="themeToggle" onchange="toggleTheme(this)">
+                        <span class="settings-switch-track">
+                            <span class="settings-switch-icon settings-switch-icon--off">🌙</span>
+                            <span class="settings-switch-icon settings-switch-icon--on">☀️</span>
+                            <span class="settings-switch-thumb"></span>
+                        </span>
+                    </label>
+                </div>
+                <!-- Language -->
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <span class="settings-row-label" data-i18n="settings.language">Lingua</span>
+                        <span class="settings-row-desc" id="langLabel">Italiano</span>
+                    </div>
+                    <label class="settings-switch">
+                        <input type="checkbox" id="langToggle" onchange="toggleLang(this)">
+                        <span class="settings-switch-track">
+                            <span class="settings-switch-icon settings-switch-icon--off">🇬🇧</span>
+                            <span class="settings-switch-icon settings-switch-icon--on">🇮🇹</span>
+                            <span class="settings-switch-thumb"></span>
+                        </span>
+                    </label>
+                </div>
+                <!-- FAQ / GitHub -->
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <span class="settings-row-label" data-i18n="settings.faq">FAQ & Guida</span>
+                        <span class="settings-row-desc" data-i18n="settings.faqDesc">README su GitHub</span>
+                    </div>
+                    <a href="https://github.com/LisaThomasVallauri/DiceRoll?tab=readme-ov-file#readme" target="_blank" rel="noopener noreferrer" class="settings-faq-btn" onclick="closeSettingsModal()">
+                        <span data-i18n="settings.faqBtn">📖 Apri</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marker Rename Modal -->
+    <div id="markerModal" class="marker-modal-overlay" onclick="closeMarkerModal(event)">
+        <div class="marker-modal-box" onclick="event.stopPropagation()">
+            <div class="marker-modal-header">
+                <span class="marker-modal-title" data-i18n="maps.renameModal">Rinomina Marker</span>
+                <button class="marker-modal-close" onclick="closeMarkerModal()">&times;</button>
+            </div>
+            <div class="marker-modal-body">
+                <label class="form-label-compact mb-1" data-i18n="maps.markerNameLabel">Nome Marker</label>
+                <input type="text" class="form-control form-control-sm" id="markerNameInput" data-i18n-placeholder="maps.markerNamePlaceholder" placeholder="Es: Villaggio di Bruma...">
+            </div>
+            <div class="marker-modal-footer">
+                <button class="btn btn-danger btn-sm" onclick="deleteCurrentMarker()" data-i18n="maps.delete">Elimina</button>
+                <button class="btn btn-secondary btn-sm" onclick="closeMarkerModal()" data-i18n="maps.cancel">Annulla</button>
+                <button class="btn btn-primary btn-sm" onclick="saveMarkerName()" data-i18n="maps.save">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid p-3">
+        <!-- Tabs Navigation with Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-3 topbar-wrapper">
+
+            <!-- BURGER TABS (mobile/tablet only) -->
+            <div class="burger-tabs-wrapper d-none">
+                <button class="burger-btn" id="burgerTabsBtn" onclick="toggleBurgerMenu('burgerTabsMenu', 'burgerTabsBtn')" aria-label="Menu tab">
+                    <span class="burger-active-label" id="burgerActiveTab">SCHEDA</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <div class="burger-dropdown" id="burgerTabsMenu">
+                    <button class="burger-menu-item active" data-target="#sheet" data-label="SCHEDA" onclick="selectBurgerTab(this)" data-i18n="tabs.sheet">SCHEDA PERSONAGGIO</button>
+                    <button class="burger-menu-item" data-target="#equip" data-label="EQUIPAG." onclick="selectBurgerTab(this)" data-i18n="tabs.equip">EQUIPAGGIAMENTO</button>
+                    <button class="burger-menu-item" data-target="#spells" data-label="INCANTESIMI" onclick="selectBurgerTab(this)" data-i18n="tabs.spells">INCANTESIMI</button>
+                    <button class="burger-menu-item" data-target="#maps" data-label="MAPPE" onclick="selectBurgerTab(this)" data-i18n="tabs.maps">MAPPE</button>
+                    <button class="burger-menu-item" data-target="#scaling" data-label="SCALING" onclick="selectBurgerTab(this)" data-i18n="tabs.scaling">SCALING ABILITA'</button>
+                    <button class="burger-menu-item" data-target="#dm" data-label="DM" onclick="selectBurgerTab(this)" data-i18n="tabs.dm">DUNGEON MASTER</button>
+                    <button class="burger-menu-item" data-target="#party" data-label="PARTY" onclick="selectBurgerTab(this)" data-i18n="tabs.party">PARTY</button>
+                </div>
+            </div>
+
+            <!-- NORMAL TABS (desktop) -->
+            <ul class="nav nav-tabs flex-grow-1 desktop-tabs" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="sheet-tab" data-bs-toggle="tab" data-bs-target="#sheet" type="button" data-i18n="tabs.sheet">SCHEDA PERSONAGGIO</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="equip-tab" data-bs-toggle="tab" data-bs-target="#equip" type="button" data-i18n="tabs.equip">EQUIPAGGIAMENTO</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="spells-tab" data-bs-toggle="tab" data-bs-target="#spells" type="button" data-i18n="tabs.spells">INCANTESIMI</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="maps-tab" data-bs-toggle="tab" data-bs-target="#maps" type="button" data-i18n="tabs.maps">MAPPE</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="scaling-tab" data-bs-toggle="tab" data-bs-target="#scaling" type="button" data-i18n="tabs.scaling">SCALING ABILITA'</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="dm-tab" data-bs-toggle="tab" data-bs-target="#dm" type="button" data-i18n="tabs.dm">DUNGEON MASTER</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="party-tab" data-bs-toggle="tab" data-bs-target="#party" type="button" data-i18n="tabs.party">PARTY <span class="party-tab-dot" id="partyTabDot"></span></button>
+                </li>
+            </ul>
+
+            <!-- NORMAL ACTION BUTTONS (desktop) -->
+            <div class="ms-3 d-flex gap-2 align-items-center desktop-actions">
+                <button class="btn btn-danger btn-sm" onclick="resetSheet()" data-i18n="buttons.reset">Reset</button>
+                <button class="btn btn-info btn-sm" onclick="loadData()" data-i18n="buttons.load">Carica</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="saveData()" data-i18n="buttons.save">Salva</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="saveDataAs()" data-i18n="buttons.saveAs">Salva con nome</button>
+                <button class="btn btn-settings" onclick="openSettingsModal()" data-i18n-title="buttons.settings" title="Impostazioni" aria-label="Impostazioni">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- BURGER ACTIONS (mobile/tablet only) -->
+            <div class="burger-actions-wrapper d-none">
+                <button class="burger-btn" id="burgerActionsBtn" onclick="toggleBurgerMenu('burgerActionsMenu', 'burgerActionsBtn')" aria-label="Menu azioni">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
+                <div class="burger-dropdown burger-dropdown--right" id="burgerActionsMenu">
+                    <button class="burger-menu-item burger-menu-item--danger" onclick="resetSheet(); closeBurgerMenus()" data-i18n="buttons.reset">🗑 Reset</button>
+                    <button class="burger-menu-item burger-menu-item--info" onclick="loadData(); closeBurgerMenus()" data-i18n="buttons.load">📂 Carica</button>
+                    <button class="burger-menu-item burger-menu-item--success" onclick="saveData(); closeBurgerMenus()" data-i18n="buttons.save">💾 Salva</button>
+                    <button class="burger-menu-item burger-menu-item--success" onclick="saveDataAs(); closeBurgerMenus()" data-i18n="buttons.saveAs">💾 Salva con nome</button>
+                    <div class="burger-menu-divider"></div>
+                    <button class="burger-menu-item" onclick="openSettingsModal(); closeBurgerMenus()" data-i18n-title="buttons.settings">⚙️ Impostazioni</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- SCHEDA PERSONAGGIO -->
+            <div class="tab-pane fade show active" id="sheet" role="tabpanel">
+                <!-- Character Info -->
+                <div class="card mb-2">
+                    <div class="card-header" data-i18n="characterInfo.header">INFORMAZIONI PERSONAGGIO</div>
+                    <div class="card-body p-2">
+                        <div class="row g-2 mb-1">
+                            <div class="col-2">
+                                <label class="form-label-compact" data-i18n="characterInfo.name">Nome Personaggio</label>
+                                <input type="text" class="form-control form-control-sm" id="charName">
+                            </div>
+                            <div class="col-2">
+                                <label class="form-label-compact" data-i18n="characterInfo.class">Classe</label>
+                                <input type="text" class="form-control form-control-sm" id="charClass">
+                            </div>
+                            <div class="col-2">
+                                <label class="form-label-compact" data-i18n="characterInfo.race">Razza</label>
+                                <input type="text" class="form-control form-control-sm" id="charRace">
+                            </div>
+                            <div class="col-2">
+                                <label class="form-label-compact" data-i18n="characterInfo.background">Background</label>
+                                <input type="text" class="form-control form-control-sm" id="charBackground">
+                            </div>
+                            <div class="col-2">
+                                <label class="form-label-compact" data-i18n="characterInfo.alignment">Allineamento</label>
+                                <input type="text" class="form-control form-control-sm" id="charAlignment">
+                            </div>
+                            <div class="col-2">
+                                <label class="form-label-compact" data-i18n="characterInfo.level">Livello</label>
+                                <input type="number" class="form-control form-control-sm" id="charLevel" value="1">
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col">
+                                <label class="form-label-compact" data-i18n="characterInfo.xp">Esperienza</label>
+                                <input type="number" class="form-control form-control-sm" id="charXP" value="0">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact" data-i18n="characterInfo.age">Eta'</label>
+                                <input type="text" class="form-control form-control-sm" id="charAge">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact" data-i18n="characterInfo.height">Altezza</label>
+                                <input type="text" class="form-control form-control-sm" id="charHeight">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact" data-i18n="characterInfo.weight">Peso</label>
+                                <input type="text" class="form-control form-control-sm" id="charWeight">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact" data-i18n="characterInfo.skin">Carnagione</label>
+                                <input type="text" class="form-control form-control-sm" id="charSkin">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact" data-i18n="characterInfo.hair">Capelli</label>
+                                <input type="text" class="form-control form-control-sm" id="charHair">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact" data-i18n="characterInfo.eyes">Occhi</label>
+                                <input type="text" class="form-control form-control-sm" id="charEyes">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Row -->
+                <div class="row g-2">
+                    <!-- Abilities Column -->
+                    <div class="col-lg-2">
+                        <div class="card mb-2">
+                            <div class="card-header" data-i18n="abilities.header">CARATTERISTICHE</div>
+                            <div class="card-body p-2">
+                                <div id="abilitiesContainer"></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" data-i18n="saves.header">TIRI SALVEZZA</div>
+                            <div class="card-body p-2">
+                                <div id="savesContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skills Column -->
+                    <div class="col-lg-3">
+                        <div class="card">
+                            <div class="card-header" data-i18n="skills.header">ABILITA'</div>
+                            <div class="card-body p-2">
+                                <div class="skills-header mb-1">
+                                    <div class="skill-row-header">
+                                        <span class="skill-name-header" data-i18n="skills.colName">Nome</span>
+                                        <span class="skill-mod-header" data-i18n="skills.colMod">Mod</span>
+                                        <span class="skill-check-header" data-i18n="skills.colProf">C</span>
+                                        <span class="skill-check-header" data-i18n="skills.colMastery">M</span>
+                                    </div>
+                                </div>
+                                <div id="skillsContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Combat Column -->
+                    <div class="col-lg-4">
+                        <!-- Combat Stats Row -->
+                        <div class="combat-stats-row mb-2">
+                            <div class="combat-stat-box">
+                                <label class="form-label-compact mb-0" data-i18n="combat.initiative">Iniziativa</label>
+                                <div class="stat-display-small" id="initiative">+0</div>
+                            </div>
+                            <div class="combat-stat-box">
+                                <label class="form-label-compact mb-0" data-i18n="combat.speed">Velocita'</label>
+                                <input type="text" class="form-control form-control-sm text-center" id="speed" value="30">
+                            </div>
+                            <div class="combat-stat-box">
+                                <label class="form-label-compact mb-0" data-i18n="combat.proficiency">Competenza</label>
+                                <input type="text" class="form-control form-control-sm text-center" id="profBonus" value="2">
+                            </div>
+                            <div class="combat-stat-box">
+                                <label class="form-label-compact mb-0" data-i18n="combat.passivePerception">Percez. Pass.</label>
+                                <div class="stat-display-small" id="passivePerception">10</div>
+                            </div>
+                        </div>
+                        <div class="card mb-2">
+                            <div class="card-header bg-danger text-white" data-i18n="combat.hpHeader">PUNTI FERITA</div>
+                            <div class="card-body p-2">
+                                <div class="row g-2">
+                                    <div class="col-4">
+                                        <label class="form-label-compact mb-1" data-i18n="combat.hpCurrent">Attuali</label>
+                                        <input type="number" class="form-control form-control-sm text-center" id="hpCurrent" value="10" min="0" oninput="updateHPBar()">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label-compact mb-1" data-i18n="combat.hpMax">Massimi</label>
+                                        <input type="number" class="form-control form-control-sm text-center" id="hpMax" value="10" min="0" oninput="updateHPBar()">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label-compact mb-1" data-i18n="combat.hpTemp">Temp</label>
+                                        <input type="number" class="form-control form-control-sm text-center" id="hpTemp" value="0" min="0" oninput="updateHPBar()">
+                                    </div>
+                                </div>
+                                <div class="hp-bars-container">
+                                    <div class="hp-bar-row">
+                                        <div class="hp-bar-track" title="">
+                                            <div class="hp-bar-fill" id="hpBarFill"></div>
+                                            <span class="hp-bar-label" id="hpBarLabel">10 / 10</span>
+                                        </div>
+                                    </div>
+                                    <div class="hp-bar-row" id="tempHPRow" style="display:none;">
+                                        <div class="hp-bar-track" title="">
+                                            <div class="hp-bar-fill hp-temp" id="hpBarTempFill"></div>
+                                            <span class="hp-bar-label" id="hpBarTempLabel">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-4">
+                                <label class="form-label-compact mb-1" data-i18n="combat.ca">CA</label>
+                                <input type="number" class="form-control form-control-sm text-center" id="ac" value="10">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label-compact mb-1" data-i18n="combat.caTemp">CA Temp</label>
+                                <input type="number" class="form-control form-control-sm text-center" id="tempAC" value="0">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label-compact mb-1" data-i18n="combat.hitDice">Dadi Vita</label>
+                                <div class="hit-dice-group">
+                                    <input type="number" class="form-control form-control-sm text-center" id="diceCurrent" value="1">
+                                    <span class="hit-dice-separator">/</span>
+                                    <input type="number" class="form-control form-control-sm text-center" id="diceMax" value="1">
+                                    <select class="form-select form-select-sm text-center" id="diceType">
+                                        <option value="d4">d4</option>
+                                        <option value="d6">d6</option>
+                                        <option value="d8" selected>d8</option>
+                                        <option value="d10">d10</option>
+                                        <option value="d12">d12</option>
+                                        <option value="d20">d20</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mb-2">
+                            <div class="card-body p-2">
+                                <h6 class="mb-2 card-subtitle" data-i18n="combat.deathSaves">TS CONTRO MORTE</h6>
+                                <div class="death-saves-wrapper">
+                                    <i class="bi bi-heart-pulse-fill death-saves-icon"></i>
+                                    <div class="death-saves-row">
+                                        <div class="death-saves-group">
+                                            <span class="text-success fw-bold small" data-i18n="combat.successes">SUCCESSI</span>
+                                            <div class="d-flex gap-2">
+                                                <input type="checkbox" class="death-save-success" id="ds-success-1">
+                                                <input type="checkbox" class="death-save-success" id="ds-success-2">
+                                                <input type="checkbox" class="death-save-success" id="ds-success-3">
+                                            </div>
+                                        </div>
+                                        <div class="death-saves-group">
+                                            <span class="text-danger fw-bold small" data-i18n="combat.failures">FALLIMENTI</span>
+                                            <div class="d-flex gap-2">
+                                                <input type="checkbox" class="death-save-failure" id="ds-failure-1">
+                                                <input type="checkbox" class="death-save-failure" id="ds-failure-2">
+                                                <input type="checkbox" class="death-save-failure" id="ds-failure-3">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <i class="bi bi-heartbreak-fill death-saves-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body p-2">
+                                <h6 class="mb-2 card-subtitle" data-i18n="combat.weapons">ARMI</h6>
+                                <div class="weapons-header-grid mb-1">
+                                    <span class="fw-bold small" data-i18n="combat.weaponName">Arma</span>
+                                    <span class="fw-bold small text-center" data-i18n="combat.weaponBonus">Bonus</span>
+                                    <span class="fw-bold small" data-i18n="combat.weaponDamage">Danno</span>
+                                </div>
+                                <div id="weaponsContainer" class="weapons-list"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Column -->
+                    <div class="col-lg-3">
+                        <div class="card">
+                            <div class="card-header" id="imageCardHeader">IMMAGINE <span id="imageCounter">(0/0)</span></div>
+                            <div class="card-body p-2">
+                                <div class="btn-group mb-2 w-100 btn-group-sm">
+                                    <button class="btn btn-primary" onclick="loadCharImage()" data-i18n="image.load">Carica</button>
+                                    <button class="btn btn-danger" onclick="clearCharImage()" data-i18n="image.remove">Rimuovi</button>
+                                    <button class="btn btn-secondary" onclick="prevCharImage()" data-i18n="image.prev">Prec</button>
+                                    <button class="btn btn-secondary" onclick="nextCharImage()" data-i18n="image.next">Succ</button>
+                                </div>
+                                <div id="charImageContainer" class="image-container text-center">
+                                    <p class="text-muted small">Nessuna immagine</p>
+                                </div>
+                                <input type="file" id="charImageInput" accept="image/*" multiple style="display:none;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EQUIPAGGIAMENTO E APPUNTI -->
+            <div class="tab-pane fade" id="equip" role="tabpanel">
+                <!-- Coins at the very top -->
+                <div class="card mb-2">
+                    <div class="card-header" data-i18n="equip.coins">MONETE</div>
+                    <div class="card-body p-2">
+                        <div class="row g-2">
+                            <div class="col">
+                                <label class="form-label-compact mb-1" data-i18n="equip.copper">MR</label>
+                                <input type="number" class="form-control form-control-sm" id="coinMR" value="0">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact mb-1" data-i18n="equip.silver">MA</label>
+                                <input type="number" class="form-control form-control-sm" id="coinMA" value="0">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact mb-1" data-i18n="equip.electrum">ME</label>
+                                <input type="number" class="form-control form-control-sm" id="coinME" value="0">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact mb-1" data-i18n="equip.gold">MO</label>
+                                <input type="number" class="form-control form-control-sm" id="coinMO" value="0">
+                            </div>
+                            <div class="col">
+                                <label class="form-label-compact mb-1" data-i18n="equip.platinum">MP</label>
+                                <input type="number" class="form-control form-control-sm" id="coinMP" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-2 equip-row-stretch">
+                    <div class="col-lg-6 d-flex">
+                        <div class="card flex-grow-1">
+                            <div class="card-header" data-i18n="equip.equipHeader">EQUIPAGGIAMENTO (150 SLOT)</div>
+                            <div class="card-body p-2">
+                                <div class="equipment-list-scrollable" id="equipmentContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 d-flex flex-column">
+                        <div class="card mb-2 flex-grow-1">
+                            <div class="card-header" data-i18n="equip.traitsHeader">TRATTI &amp; CARATTERISTICHE</div>
+                            <div class="card-body p-2 d-flex">
+                                <textarea class="form-control equip-notes-textarea flex-grow-1" id="featuresTraits" data-i18n-placeholder="equip.traitsPlaceholder" placeholder="Inserisci tratti, privilegi di classe, background..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="card flex-grow-1">
+                            <div class="card-header" data-i18n="equip.playerNotesHeader">APPUNTI GIOCATORE</div>
+                            <div class="card-body p-2 d-flex">
+                                <textarea class="form-control equip-notes-textarea flex-grow-1" id="playerNotes" data-i18n-placeholder="equip.playerNotesPlaceholder" placeholder="Appunti personali..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INCANTESIMI -->
+            <div class="tab-pane fade" id="spells" role="tabpanel">
+                <div class="spells-header-bar">
+                    <div class="spell-stat-block">
+                        <span class="spell-stat-label" data-i18n="spells.characteristic">Caratteristica</span>
+                        <select class="form-select form-select-sm spell-ability-select" id="spellAbility">
+                            <option value="-">-</option>
+                            <option value="FOR">FOR</option>
+                            <option value="DES">DES</option>
+                            <option value="COS">COS</option>
+                            <option value="INT">INT</option>
+                            <option value="SAG">SAG</option>
+                            <option value="CAR">CAR</option>
+                        </select>
+                    </div>
+                    <div class="spell-stat-block">
+                        <span class="spell-stat-label" data-i18n="spells.saveDC">CD Incantesimi</span>
+                        <span class="spell-stat-value" id="spellSaveDC">10</span>
+                    </div>
+                    <div class="spell-stat-block">
+                        <span class="spell-stat-label" data-i18n="spells.attackBonus">Bonus Attacco</span>
+                        <span class="spell-stat-value" id="spellAttackBonus">+0</span>
+                    </div>
+                    <div class="spell-stat-divider"></div>
+                    <div class="spell-stat-block">
+                        <span class="spell-stat-label" data-i18n="spells.cantrips">Trucchetti</span>
+                        <span class="spell-stat-value spell-stat-count" id="cantripsKnown">0</span>
+                    </div>
+                    <div class="spell-stat-block">
+                        <span class="spell-stat-label" data-i18n="spells.spells">Incantesimi</span>
+                        <span class="spell-stat-value spell-stat-count" id="spellsKnown">0</span>
+                    </div>
+                    <div class="spell-stat-block">
+                        <span class="spell-stat-label" data-i18n="spells.prepared">Preparati</span>
+                        <span class="spell-stat-value spell-stat-count" id="spellsPrepared">0</span>
+                    </div>
+                </div>
+
+                <div class="spells-layout">
+                    <!-- Left: Cantrips -->
+                    <div class="spells-cantrips-col">
+                        <div class="card spells-card">
+                            <div class="card-header spells-card-header">
+                                <span data-i18n="spells.cantripsHeader">TRUCCHETTI</span>
+                            </div>
+                            <div class="card-body p-2 spells-card-body" id="cantripsContainer"></div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Spells with Level Tabs -->
+                    <div class="spells-main-col">
+                        <div class="card spells-card">
+                            <div class="card-header spells-card-header d-flex align-items-center justify-content-between">
+                                <span data-i18n="spells.spellsHeader">INCANTESIMI</span>
+                                <div class="spell-level-tabs" id="spellLevelTabs">
+                                    <button class="spell-level-tab active" data-level="1">1</button>
+                                    <button class="spell-level-tab" data-level="2">2</button>
+                                    <button class="spell-level-tab" data-level="3">3</button>
+                                    <button class="spell-level-tab" data-level="4">4</button>
+                                    <button class="spell-level-tab" data-level="5">5</button>
+                                    <button class="spell-level-tab" data-level="6">6</button>
+                                    <button class="spell-level-tab" data-level="7">7</button>
+                                    <button class="spell-level-tab" data-level="8">8</button>
+                                    <button class="spell-level-tab" data-level="9">9</button>
+                                </div>
+                            </div>
+                            <div class="card-body p-2 spells-card-body" id="spellLevelsContainer"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Spell Slots -->
+                    <div class="spells-slots-col">
+                        <div class="card spells-card">
+                            <div class="card-header spells-card-header" data-i18n="spells.slotsHeader">SLOT INCANTESIMI</div>
+                            <div class="card-body p-2 spells-card-body" id="spellSlotsContainer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== MAPPE ==================== -->
+            <div class="tab-pane fade" id="maps" role="tabpanel">
+                <div class="maps-layout">
+                    <!-- Left sidebar: map list + controls -->
+                    <div class="maps-sidebar">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span data-i18n="maps.managerHeader">GESTIONE MAPPE</span>
+                                <span class="maps-counter" id="mapsCounter">(0)</span>
+                            </div>
+                            <div class="card-body p-2 d-flex flex-column gap-2">
+                                <button class="btn btn-primary btn-sm w-100" onclick="addMapImage()" data-i18n="maps.addMap">
+                                    + Aggiungi Mappa
+                                </button>
+                                <input type="file" id="mapImageInput" accept="image/*" multiple style="display:none;">
+
+                                <!-- Map List -->
+                                <div class="maps-list-scrollable" id="mapsListContainer">
+                                    <p class="text-muted small text-center mt-3" data-i18n="maps.noMapsLoaded">Nessuna mappa caricata</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Map Viewer + Marker Tools -->
+                    <div class="maps-viewer-col">
+                        <!-- Sub-tab bar -->
+                        <div class="maps-subtab-bar">
+                            <button class="maps-subtab active" id="subtab-view" onclick="switchMapSubtab('view')" data-i18n="maps.viewMap">
+                                Vista Mappa
+                            </button>
+                            <button class="maps-subtab" id="subtab-markers" onclick="switchMapSubtab('markers')" data-i18n="maps.manageMarkers">
+                                Gestione Marker
+                            </button>
+                            <div class="maps-subtab-spacer"></div>
+                            <span class="maps-active-label" id="activeMapName">Nessuna mappa selezionata</span>
+                        </div>
+
+                        <!-- Vista Mappa panel -->
+                        <div class="maps-subpanel" id="subpanel-view">
+                            <div class="maps-toolbar">
+                                <span class="maps-toolbar-label" data-i18n="maps.modeLabel">Modalita':</span>
+                                <div class="maps-mode-btns">
+                                    <button class="maps-mode-btn active" id="modeBtn-view" onclick="setMapMode('view')" title="Solo visuale">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        <span data-i18n="maps.modeView">Visuale</span>
+                                    </button>
+                                    <button class="maps-mode-btn" id="modeBtn-place" onclick="setMapMode('place')" title="Piazza marker">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                                        <span data-i18n="maps.modePlace">Piazza</span>
+                                    </button>
+                                </div>
+                                <div class="maps-marker-types" id="markerTypeSelector" style="display:none;">
+                                    <span class="maps-toolbar-label" data-i18n="maps.typeLabel">Tipo:</span>
+                                    <button class="maps-marker-type-btn active" data-type="main-quest" onclick="selectMarkerType(this)" title="Main Quest">
+                                        <span class="marker-dot" style="background:#e8b04b;"></span> Main Quest
+                                    </button>
+                                    <button class="maps-marker-type-btn" data-type="personal-quest" onclick="selectMarkerType(this)" title="Personal Quest">
+                                        <span class="marker-dot" style="background:#7c6fe0;"></span> Personal Quest
+                                    </button>
+                                    <button class="maps-marker-type-btn" data-type="sub-quest" onclick="selectMarkerType(this)" title="Sub Quest">
+                                        <span class="marker-dot" style="background:#5cb85c;"></span> Sub Quest
+                                    </button>
+                                    <button class="maps-marker-type-btn" data-type="shop" onclick="selectMarkerType(this)" title="Shop">
+                                        <span class="marker-dot" style="background:#4a9eff;"></span> Shop
+                                    </button>
+                                    <button class="maps-marker-type-btn" data-type="boss" onclick="selectMarkerType(this)" title="Boss">
+                                        <span class="marker-dot" style="background:#d9534f;"></span> Boss
+                                    </button>
+                                    <button class="maps-marker-type-btn" data-type="item" onclick="selectMarkerType(this)" title="Item">
+                                        <span class="marker-dot" style="background:#5cc8c8;"></span> Item
+                                    </button>
+                                </div>
+                                <div class="maps-toolbar-spacer"></div>
+                                <button class="btn btn-sm btn-danger" onclick="clearAllMarkers()" id="clearMarkersBtn" style="display:none;" data-i18n="maps.clearMarkers">Pulisci Marker</button>
+                            </div>
+
+                            <!-- Map Canvas Wrapper -->
+                            <div class="maps-canvas-wrapper" id="mapsCanvasWrapper">
+                                <div class="maps-empty-state" id="mapsEmptyState">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+                                    <p data-i18n="maps.selectMapPrompt">Seleziona o carica una mappa dal pannello a sinistra</p>
+                                </div>
+                                <div class="maps-img-container" id="mapsImgContainer" style="display:none;">
+                                    <img id="activeMapImg" src="" alt="Mappa" draggable="false">
+                                    <div id="markersLayer" class="markers-layer"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gestione Marker panel -->
+                        <div class="maps-subpanel" id="subpanel-markers" style="display:none;">
+                            <div class="maps-markers-panel">
+                                <div class="maps-markers-header">
+                                    <div class="maps-legend">
+                                        <span class="maps-legend-title" data-i18n="maps.markerLegend">LEGENDA MARKER</span>
+                                        <div class="maps-legend-items">
+                                            <div class="maps-legend-item"><span class="marker-dot" style="background:#e8b04b;"></span><span>Main Quest</span></div>
+                                            <div class="maps-legend-item"><span class="marker-dot" style="background:#7c6fe0;"></span><span>Personal Quest</span></div>
+                                            <div class="maps-legend-item"><span class="marker-dot" style="background:#5cb85c;"></span><span>Sub Quest</span></div>
+                                            <div class="maps-legend-item"><span class="marker-dot" style="background:#4a9eff;"></span><span>Shop</span></div>
+                                            <div class="maps-legend-item"><span class="marker-dot" style="background:#d9534f;"></span><span>Boss</span></div>
+                                            <div class="maps-legend-item"><span class="marker-dot" style="background:#5cc8c8;"></span><span>Item</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="maps-markers-list-wrapper">
+                                    <div id="markersListContainer" class="maps-markers-list">
+                                        <p class="text-muted small text-center mt-3" data-i18n="maps.noMarkers">Nessun marker presente su questa mappa</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ==================== FINE MAPPE ==================== -->
+
+            <!-- SCALING ABILITA' -->
+            <div class="tab-pane fade" id="scaling" role="tabpanel">
+                <div class="card">
+                    <div class="card-header" data-i18n="scaling.header">SCALING ABILITA'</div>
+                    <div class="card-body p-2">
+                        <p class="text-muted small" data-i18n="scaling.description">Personalizza quale caratteristica usa ogni abilita' per il calcolo.</p>
+                        <div id="scalingContainer" class="row g-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DUNGEON MASTER -->
+            <div class="tab-pane fade" id="dm" role="tabpanel">
+                <div class="row g-2">
+                    <!-- Left Column: NPC Stats (top) + Dice (bottom) -->
+                    <div class="col-lg-4">
+                        <div class="card mb-2">
+                            <div class="card-header" data-i18n="dm.npcHeader">STATISTICHE NPC</div>
+                            <div class="card-body p-2">
+                                <div class="row g-1 mb-2">
+                                    <div class="col-3">
+                                        <label class="form-label-compact mb-0">HP</label>
+                                        <input type="number" class="form-control form-control-sm" id="dmHP" value="0">
+                                    </div>
+                                    <div class="col-3">
+                                        <label class="form-label-compact mb-0">CA</label>
+                                        <input type="number" class="form-control form-control-sm" id="dmAC" value="0">
+                                    </div>
+                                    <div class="col-3">
+                                        <label class="form-label-compact mb-0" data-i18n="dm.initiative">Iniziativa</label>
+                                        <div class="stat-display-small" id="dmInitiative">+0</div>
+                                    </div>
+                                    <div class="col-3">
+                                        <label class="form-label-compact mb-0" data-i18n="dm.proficiency">Comp.</label>
+                                        <input type="number" class="form-control form-control-sm" id="dmProf" value="2">
+                                    </div>
+                                </div>
+                                <div id="dmAbilitiesContainer" class="row g-1"></div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header" data-i18n="dm.diceHeader">COMANDI DADI</div>
+                            <div class="card-body p-2">
+                                <div class="input-group input-group-sm mb-1">
+                                    <input type="text" class="form-control" id="diceCommand" data-i18n-placeholder="dm.dicePlaceholder" placeholder="es: 2d6+4">
+                                    <button class="btn btn-primary" onclick="rollDice()" data-i18n="dm.rollBtn">Tira</button>
+                                </div>
+                                <div class="btn-group mb-1 w-100 btn-group-sm" role="group">
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d4')">d4</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d6')">d6</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d8')">d8</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d10')">d10</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d12')">d12</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d20')">d20</button>
+                                    <button class="btn btn-outline-light" onclick="quickRoll('1d100')">d100</button>
+                                </div>
+                                <button class="btn btn-sm btn-light w-100 mb-1" onclick="showDiceHelp()" data-i18n="dm.diceHelp">Sintassi Dadi</button>
+                                <div class="dice-log dm-dice-log" id="diceLog"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center Column: Images -->
+                    <div class="col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-header" id="dmImageCardHeader">GALLERIA IMMAGINI <span id="dmImageCounter">(0/0)</span></div>
+                            <div class="card-body p-2 d-flex flex-column">
+                                <div class="btn-group mb-2 w-100 btn-group-sm">
+                                    <button class="btn btn-primary" onclick="addDMImage()" data-i18n="dm.addImage">Aggiungi</button>
+                                    <button class="btn btn-danger" onclick="removeDMImage()" data-i18n="dm.removeImage">Rimuovi</button>
+                                    <button class="btn btn-secondary" onclick="prevDMImage()" data-i18n="dm.prevImage">Prec</button>
+                                    <button class="btn btn-secondary" onclick="nextDMImage()" data-i18n="dm.nextImage">Succ</button>
+                                </div>
+                                <div id="dmImageContainer" class="dm-image-container text-center">
+                                    <p class="text-muted small" data-i18n="dm.noImage">Nessuna immagine</p>
+                                </div>
+                                <input type="file" id="dmImageInput" accept="image/*" multiple style="display:none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Notes -->
+                    <div class="col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-header" data-i18n="dm.notesHeader">APPUNTI DM</div>
+                            <div class="card-body p-2 d-flex">
+                                <textarea class="form-control dm-notes-textarea flex-grow-1" id="dmNotes" data-i18n-placeholder="dm.notesPlaceholder" placeholder="Appunti del Dungeon Master..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PARTY -->
+            <div class="tab-pane fade" id="party" role="tabpanel">
+                <div class="party-layout">
+                    <!-- Left: Party Controls -->
+                    <div class="party-controls-col">
+                        <div class="card h-100">
+                            <div class="card-header" data-i18n="party.managerHeader">GESTIONE PARTY</div>
+                            <div class="card-body p-3 d-flex flex-column gap-3">
+                                <div>
+                                    <label class="form-label-compact mb-1" data-i18n="party.nickname">Nickname</label>
+                                    <input type="text" class="form-control form-control-sm" id="partyNickname" data-i18n-placeholder="party.nicknamePlaceholder" placeholder="Il tuo nickname...">
+                                </div>
+                                <div>
+                                    <label class="form-label-compact mb-1" data-i18n="party.password">Password Party</label>
+                                    <div class="party-password-group">
+                                        <input type="password" class="form-control form-control-sm" id="partyPassword" data-i18n-placeholder="party.passwordPlaceholder" placeholder="Password...">
+                                        <button class="btn btn-sm btn-secondary party-password-toggle" id="partyPasswordToggle" type="button">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="form-label-compact mb-1" data-i18n="party.serverIP">IP Server</label>
+                                    <div class="party-password-group">
+                                        <input type="text" class="form-control form-control-sm" id="serverIP" value="localhost" data-i18n-placeholder="party.serverIPPlaceholder" placeholder="es. 192.168.1.10">
+                                        <button class="btn btn-sm btn-secondary party-password-toggle" id="detectIPBtn" type="button" title="Auto-detect server IP">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="party-buttons">
+                                    <button class="btn btn-primary w-100" id="btnCreateParty" data-i18n="party.createParty">Crea Party</button>
+                                    <button class="btn btn-success w-100" id="btnJoinParty" data-i18n="party.joinParty">Unisciti al Party</button>
+                                    <button class="btn btn-warning w-100" id="btnLeaveParty" disabled data-i18n="party.leaveParty">Esci dal Party</button>
+                                </div>
+                                <div class="party-status mt-auto">
+                                    <div class="party-status-indicator">
+                                        <span class="party-status-dot offline"></span>
+                                        <span class="party-status-text" id="partyStatusText">Non connesso</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Chat -->
+                    <div class="party-chat-col">
+                        <div class="card h-100 d-flex flex-column">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span data-i18n="party.chatHeader">CHAT DEL PARTY</span>
+                                <button class="btn btn-sm btn-secondary" id="chatBgBtn" title="Cambia sfondo chat">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                </button>
+                            </div>
+                            <div class="card-body p-0 d-flex flex-column flex-grow-1" style="position:relative; overflow:hidden; min-height: 0;">
+                                <div class="chat-bg-image" id="chatBgImage" style="background-image: url('./img/bgChat.png');"></div>
+                                <div class="chat-messages-area" id="chatMessages">
+                                    <div class="chat-welcome-msg">
+                                        <p data-i18n="party.welcomeMsg">Benvenuto nella chat del Party!</p>
+                                        <p class="small" data-i18n="party.welcomeDesc">Puoi inviare messaggi, tirare dadi con /roll (es: /roll 2d6+3) o condividere immagini.</p>
+                                    </div>
+                                </div>
+                                <div class="chat-input-area">
+                                    <input type="file" id="chatImageInput" accept="image/*" style="display:none;">
+                                    <input type="file" id="chatBgInput" accept="image/*" style="display:none;">
+                                    <button class="btn btn-sm chat-input-btn" id="chatImageBtn" title="Invia immagine">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    </button>
+                                    <button class="btn btn-sm chat-input-btn" id="chatDiceBtn" title="Tira dadi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="currentColor"/><circle cx="8" cy="16" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                                    </button>
+                                    <input type="text" class="form-control form-control-sm chat-text-input" id="chatInput" data-i18n-placeholder="party.chatInputPlaceholder" placeholder="Scrivi un messaggio o /roll 1d20...">
+                                    <button class="btn btn-sm btn-primary chat-send-btn" id="chatSendBtn" data-i18n="party.sendBtn">Invia</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./script.js"></script>
+    <script src="./lang/ita.js"></script>
+    <script src="./lang/eng.js"></script>
+</body>
+</html>
