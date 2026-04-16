@@ -696,6 +696,108 @@ function updateDMInitiative() {
     document.getElementById('dmInitiative').textContent = dexMod >= 0 ? `+${dexMod}` : `${dexMod}`;
 }
 
+// ==================== VISUAL EFFECTS ==================== 
+
+/**
+ * Creates floating particle effect at mouse position
+ * @param {Event} event - Click event
+ * @param {number} count - Number of particles to create
+ */
+function createParticleEffect(event, count = 8) {
+    const x = event.clientX;
+    const y = event.clientY;
+    
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle ' + ['small', 'medium', 'large'][Math.floor(Math.random() * 3)];
+        
+        const size = Math.random() * 12 + 4;
+        const angle = (Math.PI * 2 * i) / count;
+        const distance = Math.random() * 100 + 50;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance * 2;
+        
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        particle.style.setProperty('--tx', tx + 'px');
+        particle.style.setProperty('--ty', ty + 'px');
+        
+        document.body.appendChild(particle);
+        
+        // Remove particle after animation
+        setTimeout(() => particle.remove(), 3000);
+    }
+}
+
+/**
+ * Initialize ambient particle background effect
+ */
+function initializeAmbientParticles() {
+    const container = document.createElement('div');
+    container.className = 'ambient-particles';
+    
+    const particleCount = 15;
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'ambient-particle';
+        
+        const size = Math.random() * 2 + 1;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 4 + 's';
+        particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        
+        container.appendChild(particle);
+    }
+    
+    document.body.insertBefore(container, document.body.firstChild);
+}
+
+/**
+ * Apply particle effects only to dice buttons on click
+ */
+function applyParticleEffects() {
+    // Add click handlers to all dice buttons
+    const diceButtons = document.querySelectorAll('.chat-dice-popup-btn');
+    diceButtons.forEach(btn => {
+        if (!btn.dataset.particleApplied) {
+            btn.dataset.particleApplied = 'true';
+            btn.addEventListener('click', function(e) {
+                createParticleEffect(e, Math.random() * 4 + 4);
+            });
+        }
+    });
+    
+    // Watch for new dice buttons added dynamically
+    const observer = new MutationObserver(() => {
+        const newButtons = document.querySelectorAll('.chat-dice-popup-btn:not([data-particle-applied])');
+        newButtons.forEach(btn => {
+            btn.dataset.particleApplied = 'true';
+            btn.addEventListener('click', function(e) {
+                createParticleEffect(e, Math.random() * 4 + 4);
+            });
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
+/**
+ * Initialize all visual effects on page load
+ */
+function initializeVisualEffects() {
+    // Create ambient particles background
+    initializeAmbientParticles();
+    
+    // Apply particle effects to dice buttons
+    applyParticleEffects();
+}
+
 // ==================== DICE ROLLING ====================
 
 function rollDice() {
@@ -2703,6 +2805,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     initializePartyChat();
+
+    // Initialize visual effects (particles, glassmorphism, dice animations)
+    initializeVisualEffects();
 
     // Sync burger label when Bootstrap tab changes (programmatically)
     const tabLabels = {
