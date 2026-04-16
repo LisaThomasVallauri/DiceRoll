@@ -196,9 +196,11 @@ function closeSettingsModal(event) {
 
 function toggleTheme(checkbox) {
     const isDayMode = checkbox.checked;
+    document.body.classList.add('transitioning');
     document.body.classList.toggle('day-mode', isDayMode);
     document.getElementById('themeLabel').textContent = isDayMode ? t('settings.dayMode') : t('settings.nightMode');
     try { localStorage.setItem('dnd_theme', isDayMode ? 'day' : 'night'); } catch(e) {}
+    setTimeout(() => document.body.classList.remove('transitioning'), 300);
 }
 
 async function toggleLang(checkbox) {
@@ -703,13 +705,18 @@ function updateDMInitiative() {
  * @param {Event} event - Click event
  * @param {number} count - Number of particles to create
  */
-function createParticleEffect(event, count = 8) {
+function createParticleEffect(event, count = 12) {
     const x = event.clientX;
     const y = event.clientY;
     
     for (let i = 0; i < count; i++) {
         const particle = document.createElement('div');
-        particle.className = 'particle ' + ['small', 'medium', 'large'][Math.floor(Math.random() * 3)];
+        // Higher probability for medium and large particles
+        const rand = Math.random();
+        let size_class = 'small';
+        if (rand > 0.5) size_class = 'medium';
+        if (rand > 0.75) size_class = 'large';
+        particle.className = 'particle ' + size_class;
         
         const size = Math.random() * 12 + 4;
         const angle = (Math.PI * 2 * i) / count;
@@ -736,12 +743,12 @@ function initializeAmbientParticles() {
     const container = document.createElement('div');
     container.className = 'ambient-particles';
     
-    const particleCount = 15;
+    const particleCount = 35;
     for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'ambient-particle';
         
-        const size = Math.random() * 2 + 1;
+        const size = Math.random() * 3 + 1.5;
         particle.style.width = size + 'px';
         particle.style.height = size + 'px';
         particle.style.left = Math.random() * 100 + '%';
