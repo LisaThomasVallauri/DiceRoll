@@ -260,8 +260,6 @@ La Party Chat utilizza WebSocket su porta **8765**. Per funzionare correttamente
 - Se il firewall è attivo, è necessario aprire la porta `8765` (TCP)
 - L'indirizzo IP deve essere uno della rete interna (es: `192.168.X.X`, `10.0.X.X`, `172.16.X.X`)
 
-**Per uso su Internet remoto:** è necessario configurare un tunnel (es: ngrok, Cloudflare Tunnel) o VPN, in quanto il server non è progettato per uso diretto in produzione su Internet.
-
 ### Party Chat
 
 1. Avviare `python server/server.py` sulla macchina che funge da server
@@ -609,8 +607,6 @@ Party Chat uses WebSocket on port **8765**. To work properly on LAN:
 - All clients and server must be on the **same local network** (e.g., home WiFi)
 - If a firewall is active, port `8765` (TCP) must be opened
 - The IP address must be one from the internal network (e.g., `192.168.X.X`, `10.0.X.X`, `172.16.X.X`)
-
-**For remote Internet use:** A tunnel (e.g., ngrok, Cloudflare Tunnel) or VPN must be configured, as the server is not designed for direct production use over the Internet.
 
 ### Party Chat
 
