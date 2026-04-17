@@ -585,7 +585,11 @@ Party Chat uses WebSocket on port **8765**. To work properly on LAN:
 
 - All clients and the server must be on the **same local network** (e.g., home WiFi)
 - If a firewall is active, port `8765` (TCP) must be opened
+<<<<<<< HEAD
 - The IP address must be a local network address (e.g., `192.168.X.X`, `10.0.X.X`, `172.16.X.X`)
+=======
+- The IP address must be one from the internal network (e.g., `192.168.X.X`, `10.0.X.X`, `172.16.X.X`)
+>>>>>>> bcd43d303fb6931a3c4113f0b09a36faa3e6cfdd
 
 ### Party Chat
 
