@@ -32,112 +32,109 @@ L'applicazione è composta da un frontend statico (HTML + CSS + JavaScript) e un
 
 ### Scheda Personaggio
 - **Informazioni anagrafiche complete**: nome, classe, razza, background, allineamento, livello, esperienza, età, altezza, peso, carnagione, capelli, occhi
-- **Sistema di caratteristiche (Ability Scores)**: Forza, Destrezza, Costituzione, Intelligenza, Saggezza, Carisma con calcolo automatico dei modificatori
+- **Caratteristiche (Ability Scores)**: Forza, Destrezza, Costituzione, Intelligenza, Saggezza, Carisma con calcolo automatico dei modificatori
 - **18 Abilità** con sistema di competenza e maestria:
-  - Acrobazia, Addestrare Animali, Arcano, Atletica, Attitudine al Gioco d'Azzardo, Consapevolezza, Destrezza dei Ladri, Furtività, Indagare, Ingannare, Intuizione, Medicina, Natura, Percezione, Prestazione, Provvedere, Religione, Sopravvivenza
-  - Calcolo automatico dei modificatori legati alla caratteristica
-  - Tracciamento proficienze (checkbox a 2 stati: normalità e maestria doppia)
-  
+  - Acrobazia, Addestrare Animali, Arcano, Atletica, Furtività, Indagare, Inganno, Intimidire, Intrattenere, Intuizione, Medicina, Natura, Percezione, Persuasione, Rapidità di Mano, Religione, Sopravvivenza, Storia
+  - Calcolo automatico del modificatore legato alla caratteristica di riferimento
+  - Tracciamento delle competenze (checkbox a 2 stati: competenza e maestria doppia)
+
 - **Sistema di combattimento completo**:
   - Punti Ferita attuali, massimi e temporanei con barre di visualizzazione
   - Classe Armatura base e temporanea
-  - Iniziativa calcolata su Destrezza
+  - Iniziativa calcolata sul modificatore di Destrezza
   - Velocità di movimento personalizzabile
-  - Dadi vita con selezione del tipo (d4 → d20)
-  - **Tiri salvezza contro la morte**: tracciamento visuale di 3 successi e 3 fallimenti per il sistema di morte
-  
-- **Armi**: nome, bonus all'attacco, formula del danno (es: 1d8+2)
-- **Immagini del personaggio**: supporto per multiple immagini con navigazione avanti/indietro e lightbox ingrandita
+  - Dadi Vita con selezione del tipo (d4 → d20)
+  - **Tiri Salvezza contro la Morte**: tracciamento visuale di 3 successi e 3 fallimenti
+
+- **Armi**: nome, bonus all'attacco, formula del danno (es: `1d8+2`)
+- **Immagini del personaggio**: supporto per immagini multiple con navigazione avanti/indietro e lightbox ingrandita
 
 ### Equipaggiamento e Appunti
-- **Inventario da 150 slot**: gestione completa di oggetti, armi, armature e equipaggiamento con conteggio visuale dello spazio disponibile
+- **Inventario da 150 slot**: gestione di oggetti, armi, armature ed equipaggiamento con conteggio visuale dello spazio disponibile
 - **Sistema monetario completo** con le cinque valute ufficiali di D&D 5e:
   - Monete di Rame (MR)
   - Monete d'Argento (MA)
   - Monete d'Electrum (ME)
   - Monete d'Oro (MO)
   - Monete di Platino (MP)
-- **Sezione Tratti e Caratteristiche**: area testuale ricca per documenti i privilegi di classe, feature di background, benefici razziali, talenti e altre caratteristiche speciali
-- **Appunti del Giocatore**: spazio personale per annotazioni, obiettivi personali, segreti e note di gioco
+- **Tratti e Caratteristiche**: area testuale per documentare privilegi di classe, caratteristiche di background, tratti razziali, talenti e altre capacità speciali
+- **Appunti del Giocatore**: spazio personale per annotazioni, obiettivi, segreti e note di sessione
 
 ### Incantesimi
-- **Caratteristica da incantatore**: selezione della statistica primaria (FOR, DES, COS, INT, SAG, CAR) con calcolo automatico della CD di salvataggio incantesimo e bonus all'attacco con incantesimi
+- **Caratteristica da incantatore**: selezione della caratteristica primaria (FOR, DES, COS, INT, SAG, CAR) con calcolo automatico della CD del Tiro Salvezza degli Incantesimi e del Bonus all'Attacco con Incantesimi
 - **Trucchetti (Cantrip)**: sezione dedicata ai trucchetti illimitati con conteggio
-- **Incantesimi per Livello**: organizzazione da 1° a 9° livello con tab di navigazione
-  - Contatori separati per incantesimi conosciuti e incantesimi preparati
-  - Sistema di slot incantesimo con tracciamento usati/disponibili per ogni livello
-  - Visualizzazione progressiva degli slot per incantatori a slot (wizard, sorcerer, cleric, ecc.)
-- **Calcolo automatico**: CD degli incantesimi e bonus all'attacco aggiornati in tempo reale quando si modifica la caratteristica scelta
+- **Incantesimi per livello**: organizzazione dal 1° al 9° livello con tab di navigazione
+  - Contatori separati per incantesimi conosciuti e preparati
+  - Tracciamento degli slot incantesimo (usati/disponibili) per ogni livello
+  - Visualizzazione progressiva degli slot per incantatori a slot (mago, stregone, chierico, ecc.)
+- **Calcolo automatico**: CD e bonus all'attacco si aggiornano in tempo reale al cambio della caratteristica
 
 ### Mappe
-- **Gestione mappa multiple**: caricamento di più mappe da consultare durante la sessione di gioco
+- **Gestione mappe multiple**: caricamento di più mappe da consultare durante la sessione
 - **Due modalità di visualizzazione**:
-  - **Modalità Visuale**: consultazione pura della mappa con marker già posizionati
-  - **Modalità Piazzamento**: posizionamento di marcatori interattivi sulle mappe
-  
-- **Sistema di Marcatori Categorizzati** con colori distinti:
+  - **Modalità Visuale**: consultazione della mappa con i marcatori già posizionati
+  - **Modalità Piazzamento**: posizionamento interattivo di nuovi marcatori
+
+- **Sistema di marcatori categorizzati** con colori distinti:
   - 🟡 **Main Quest** (Giallo): quest principali della campagna
   - 🟣 **Personal Quest** (Viola): quest personali dei giocatori
   - 🟢 **Sub Quest** (Verde): missioni secondarie
   - 🔵 **Shop** (Blu): negozi, taverne e locande
   - 🔴 **Boss** (Rosso): nemici importanti, dungeon, zone pericolose
-  - 🩵 **Item** (Azzurro): oggetti, tesori, artefatti da raccogliere
-  
+  - 🩵 **Item** (Azzurro): oggetti, tesori e artefatti
+
 - **Gestione marcatori**: clic per piazzare, rinomina tramite modale dedicato, eliminazione
-- **Pannello di controllo**: legenda con tutti i marker e lista completa visibile di tutti i punti sulla mappa corrente
-- **Supporto per immagini standard**: PNG, JPG, WebP
+- **Pannello di controllo**: legenda dei tipi di marcatore e lista completa dei punti sulla mappa corrente
+- **Formati supportati**: PNG, JPG, WebP
 
 ### Scaling Abilità *(Funzionalità Homebrew)*
-- **Personalizzazione delle Abilità**: riconfigura quale caratteristica governa ciascuna delle 18 abilità
-- **Casi d'uso**: 
+- **Personalizzazione delle abilità**: riconfigura quale caratteristica governa ciascuna delle 18 abilità
+- **Casi d'uso**:
   - Classi homebrew con meccaniche alternative
   - Campagne con house rules specifiche (es: Acrobazia basata su SAG invece di DES)
-  - Sistemi di gioco modificati dove le abilità seguono regole diverse
-- **Interfaccia**: per ogni abilità, seleziona dalla dropdown la caratteristica da usare
-- **Calcoli in tempo reale**: i modificatori di abilità si aggiornano automaticamente quando cambi l'associazione
+  - Sistemi modificati in cui le abilità seguono regole diverse
+- Per ogni abilità, seleziona dalla dropdown la caratteristica da usare; i modificatori si aggiornano automaticamente in tempo reale
 
 ### Dungeon Master
-- **Pannello Statistiche NPC**: gestione completa di PNG e nemici indipendente dalla scheda del giocatore
-  - HP e Classe Armatura
+- **Pannello statistiche PNG**: gestione completa di PNG e nemici, indipendente dalla scheda del giocatore
+  - Punti Ferita e Classe Armatura
   - Iniziativa personalizzabile
-  - Bonus competenza
-  - Sei caratteristiche indipendenti (STR, DEX, CON, INT, WIS, CHA) con calcolo automatico modificatori
-  
-- **Calcolatore Dadi Avanzato**:
+  - Bonus Competenza
+  - Sei caratteristiche indipendenti (FOR, DES, COS, INT, SAG, CAR) con calcolo automatico dei modificatori
+
+- **Calcolatore dadi avanzato**:
   - Sintassi completa: `2d6+4`, `1d20-1`, `3d8` (supporta spazi e combinazioni complesse)
-  - Pulsanti rapidi per dadi standard (d4, d6, d8, d10, d12, d20, d100)
+  - Pulsanti rapidi per i dadi standard (d4, d6, d8, d10, d12, d20, d100)
   - **Log visuale** dei tiri per consultazione durante la sessione
-  - Mostra risultato totale e dettaglio di ogni dado
-  
-- **Galleria Immagini DM**: caricamento di immagini di mostri, nemici, PNG, scene di battaglia e illustrazioni per mostrare ai giocatori durante il gioco
-- **Appunti Riservati**: note private per il Dungeon Master, plothooks, segreti della trama, statistiche nascoste
+  - Mostra il risultato totale e il dettaglio di ogni dado
+
+- **Galleria immagini DM**: caricamento di illustrazioni di mostri, PNG, scene di battaglia e ambientazioni da mostrare ai giocatori durante il gioco
+- **Appunti riservati**: note private per il Dungeon Master — plot hook, segreti della trama, statistiche nascoste
 
 ### Party Chat *(Multiplayer Locale)*
-- **Connessione in Tempo Reale**: comunicazione WebSocket tra giocatori sulla stessa rete LAN
-- **Stanze Protette da Password**: ogni gruppo crea la propria stanza con password personalizzata
-- **Chat Testuale**: messaggi in tempo reale visibili a tutti i partecipanti della stanza
-- **Condivisione Immagini**: caricamento e visualizzazione di immagini direttamente nella chat (PNG, JPG, WebP)
-- **Tiri Dadi Integrati**: comando `/roll` per lanciare dadi direttamente nella chat
-  - Es: `/roll 2d20+5` lancia i dadi e mostra il risultato a tutti
+- **Connessione in tempo reale**: comunicazione WebSocket tra giocatori sulla stessa rete LAN
+- **Stanze protette da password**: ogni gruppo crea la propria stanza con password personalizzata
+- **Chat testuale**: messaggi in tempo reale visibili a tutti i partecipanti della stanza
+- **Condivisione immagini**: caricamento e visualizzazione di immagini direttamente nella chat (PNG, JPG, WebP)
+- **Tiri dadi integrati**: comando `/roll` per lanciare dadi direttamente nella chat
+  - Es: `/roll 2d20+5` — lancia i dadi e mostra il risultato a tutti
   - Supporta la stessa sintassi del calcolatore dadi
-  
-- **Stato Connessione**: indicatore visuale Online/Offline con feedback immediato
-- **Sfondo Chat Personalizzabile**: carica un'immagine personalizzata come sfondo della chat (persiste tra sessioni)
+- **Stato connessione**: indicatore visuale Online/Offline con feedback immediato
+- **Sfondo chat personalizzabile**: immagine di sfondo personalizzata per la chat (persiste tra sessioni)
 - **Auto-riconnessione**: in caso di perdita di connessione, il client tenta automaticamente di riconnettersi
-- **Auto-detect IP Server**: pulsante per rilevare automaticamente l'IP del server (richiede server avviato)
+- **Auto-detect IP server**: pulsante per rilevare automaticamente l'IP del server (richiede server avviato)
 
 ### Funzionalità Trasversali
-- **Salvataggio su File**: export della scheda in formato JSON con tutti i dati
-  - Opzione **Salva**: salva nel file precedente (se disponibile)
-  - Opzione **Salva con Nome**: selettore file per scegliere posizione e nome
-  
-- **Caricamento da File**: import di schede precedentemente salvate in qualsiasi momento
-- **Autosalvataggio Automatico**: backup ogni 60 secondi su `localStorage` del browser (protezione contro perdite accidentali)
-- **Ripristino da Backup**: se la scheda viene chiusa improvvisamente, all'apertura successiva l'app propone di ripristinare l'ultimo autosalvataggio
-- **Reset Completo**: pulsante per cancellare tutti i dati e ricominciare da zero (richiede conferma)
-- **Tema Chiaro/Scuro**: switcher per Day Mode (tema chiaro) e Night Mode (tema scuro) con preferenza salvata automaticamente
-- **Localizzazione Bilingue**: switch in tempo reale tra italiano e inglese. Tutte le label, pulsanti, tabelle cambiano lingua istantaneamente
-- **Lightbox per Immagini**: click su qualsiasi immagine per ingrandirla in modalità schermo intero
+- **Salvataggio su file**: export della scheda in formato JSON
+  - **Salva**: sovrascrive il file aperto in precedenza (se disponibile)
+  - **Salva con nome**: apre il selettore per scegliere posizione e nome del file
+- **Caricamento da file**: import di schede precedentemente salvate in qualsiasi momento
+- **Autosalvataggio automatico**: backup su `localStorage` ogni 60 secondi, come protezione contro chiusure accidentali
+- **Ripristino da backup**: se la scheda viene chiusa inaspettatamente, all'apertura successiva l'app propone di ripristinare l'ultimo autosalvataggio
+- **Reset completo**: azzera tutti i dati e ricomincia da zero (richiede conferma)
+- **Tema chiaro/scuro**: switcher Day Mode / Night Mode con preferenza salvata automaticamente
+- **Localizzazione bilingue**: switch in tempo reale tra italiano e inglese — tutte le label, i pulsanti e le tabelle cambiano lingua istantaneamente
+- **Lightbox per immagini**: clic su qualsiasi immagine per ingrandirla a schermo intero
 
 ---
 
@@ -162,7 +159,7 @@ Server (Python)
                       + HTTP info endpoint (porta 8766)
 ```
 
-La comunicazione tra client e server avviene tramite messaggi JSON su **WebSocket** (porta `8765`). I messaggi gestiti includono: `create`, `join`, `leave`, `message`, `ping/pong`.
+La comunicazione tra client e server avviene tramite messaggi JSON su **WebSocket** (porta `8765`). I tipi di messaggio gestiti sono: `create`, `join`, `leave`, `message`, `ping/pong`.
 
 ---
 
@@ -187,9 +184,7 @@ La comunicazione tra client e server avviene tramite messaggi JSON su **WebSocke
 
 ### Modalità Eseguibile Desktop
 
-
 - **Windows**: eseguire `DiceRoll.exe` dalla cartella estratta
-
 
 ### Per usare la Party Chat
 
@@ -208,7 +203,7 @@ La Party Chat richiede il server Python per il multiplayer locale:
 5. Aprire il programma (browser o .exe) e navigare alla tab **PARTY**
 6. Inserire l'IP del server (o usare il pulsante **Auto-detect**) e la password della stanza
 
-> **Nota sulla rete**: il server funziona solo su **LAN locale** (stessa WiFi/rete). Richiede Python installato nel sistema.
+> **Nota sulla rete**: il server funziona solo su **LAN locale** (stessa WiFi/rete) e richiede Python installato nel sistema.
 
 ---
 
@@ -217,26 +212,26 @@ La Party Chat richiede il server Python per il multiplayer locale:
 
 ### Salvataggio e Caricamento
 
-- **Salva**: salva la scheda nel file aperto in precedenza (se disponibile) o apre il selettore file
+- **Salva**: sovrascrive il file aperto in precedenza (se disponibile), altrimenti apre il selettore file
 - **Salva con nome**: apre sempre il selettore per scegliere nome e posizione del file
 - **Carica**: apre un file `.json` salvato in precedenza
 - **Reset**: azzera completamente la scheda (richiede conferma)
 
-All'apertura, se è presente un autosalvataggio recente **con dati**, l'applicazione propone di ripristinarlo.
+All'apertura, se è presente un autosalvataggio recente con dati, l'applicazione propone di ripristinarlo.
 
-**Formato di salvataggio:** I dati vengono serializzati in formato **JSON** con la seguente struttura principale:
+**Formato di salvataggio:** I dati vengono serializzati in formato **JSON** con la seguente struttura:
 
 ```json
 {
   "character": {
     "info": { "name": "...", "class": "...", "race": "..." },
-    "abilities": { "STR": 10, "DEX": 10, ... },
-    "skills": { "ACROBATICS": { "mod": 0, "proficiency": false, "mastery": false }, ... },
+    "abilities": { "STR": 10, "DEX": 10, "...": "..." },
+    "skills": { "ACROBATICS": { "mod": 0, "proficiency": false, "mastery": false }, "...": "..." },
     "combat": { "hp": { "current": 10, "max": 10, "temp": 0 }, "ac": 10, "initiative": 0 },
-    "spells": { "ability": "INT", "slots": { "1": { "used": 0, "total": 0 }, ... } },
-    "equipment": { "items": [...], "coins": { "copper": 0, "silver": 0, ... } },
-    "images": { "character": [...], "dm": [...] },
-    "maps": { "images": [...], "markers": [...] },
+    "spells": { "ability": "INT", "slots": { "1": { "used": 0, "total": 0 }, "...": "..." } },
+    "equipment": { "items": ["..."], "coins": { "copper": 0, "silver": 0, "...": "..." } },
+    "images": { "character": ["..."], "dm": ["..."] },
+    "maps": { "images": ["..."], "markers": ["..."] },
     "notes": { "traits": "...", "playerNotes": "...", "dmNotes": "..." }
   },
   "settings": { "theme": "dark", "language": "ita", "particles": true },
@@ -244,23 +239,15 @@ All'apertura, se è presente un autosalvataggio recente **con dati**, l'applicaz
 }
 ```
 
-**Persistenza locale:** Un backup automatico viene salvato in `localStorage` ogni 60 secondi. È un salvataggio non distruttivo; i dati vengono recuperati solo se il file principale non è disponibile.
+**Persistenza locale:** Un backup automatico viene salvato in `localStorage` ogni 60 secondi. È un salvataggio non distruttivo: i dati vengono proposti al ripristino solo se il file principale non è disponibile.
 
-**Casi d'uso comuni:**
-- Salvare la scheda di una campagna prima di ogni sessione di gioco
-- Condividere la scheda tra computer caricando il file JSON
-- Mantenere backup della trama del DM negli appunti riservati
-- Conservare più personaggi per campagne diverse
+### Configurazione di Rete per Party Chat
 
-### Configurazione di rete per Party Chat
+La Party Chat utilizza WebSocket sulla porta **8765**. Per funzionare correttamente su LAN:
 
-La Party Chat utilizza WebSocket su porta **8765**. Per funzionare correttamente su LAN:
-
-- Tutti i client e il server devono trovarsi sulla **stessa rete locale** (es: WiFi della casa)
-- Se il firewall è attivo, è necessario aprire la porta `8765` (TCP)
+- Tutti i client e il server devono trovarsi sulla **stessa rete locale** (es: WiFi di casa)
+- Se il firewall è attivo, aprire la porta `8765` (TCP)
 - L'indirizzo IP deve essere uno della rete interna (es: `192.168.X.X`, `10.0.X.X`, `172.16.X.X`)
-
-**Per uso su Internet remoto:** è necessario configurare un tunnel (es: ngrok, Cloudflare Tunnel) o VPN, in quanto il server non è progettato per uso diretto in produzione su Internet.
 
 ### Party Chat
 
@@ -279,12 +266,12 @@ La Party Chat utilizza WebSocket su porta **8765**. Per funzionare correttamente
 
 ### Calcolatore Dadi
 
-La sintassi supportata nel campo dadi del pannello DM include:
+La sintassi supportata nel pannello DM include:
 
 ```
 2d6+4        → tira 2 dadi da 6 e aggiunge 4
 1d20-1       → tira 1 dado da 20 e sottrae 1
-3 d8         → tira 3 dadi da 8 mostrando ogni risultato separatamente
+3d8          → tira 3 dadi da 8 mostrando ogni risultato separatamente
 d20          → tira un singolo dado da 20
 ```
 
@@ -319,10 +306,10 @@ DiceRoll/
 <a name="funzionalita-custom-homebrew"></a>
 ## 🎮 Funzionalità Custom (Homebrew)
 
-Oltre alle meccaniche ufficiali del manuale di D&D 5e, DiceRoll include alcune funzionalità pensate per arricchire campagne con regole personalizzate:
+Oltre alle meccaniche ufficiali del manuale di D&D 5e, DiceRoll include alcune funzionalità pensate per campagne con regole personalizzate:
 
-- **Scaling Abilità**: permette di riconfigurare quale caratteristica governa ciascuna abilità, utile per classi homebrew o regole house-rules
-- **Pannello DM indipendente**: il Dungeon Master dispone di un set completo di statistiche NPC gestibili separatamente dalla scheda del giocatore
+- **Scaling Abilità**: permette di riconfigurare quale caratteristica governa ciascuna abilità, utile per classi homebrew o house rules
+- **Pannello DM indipendente**: il Dungeon Master dispone di un set completo di statistiche PNG gestibili separatamente dalla scheda del giocatore
 - **Party Chat con lancio dadi**: la chat integrata consente di tirare dadi direttamente nella conversazione, rendendo i risultati visibili a tutti i partecipanti
 
 ---
@@ -333,15 +320,16 @@ Oltre alle meccaniche ufficiali del manuale di D&D 5e, DiceRoll include alcune f
 - I dati della scheda vengono serializzati in formato **JSON** e possono essere trasferiti tra sessioni di gioco
 - Il sistema di autosalvataggio usa `localStorage` come backup non distruttivo; la modale di ripristino appare solo se il backup contiene dati reali
 - Il server WebSocket è progettato per reti **LAN locale**; l'utilizzo su Internet richiederebbe configurazioni aggiuntive (firewall, port forwarding o tunnel)
-- Le stanze del Party sono identificate dalla **password** scelta dal creatore; password diverse equivalgono a stanze diverse
+- Le stanze del Party sono identificate dalla **password** scelta dal creatore; password diverse corrispondono a stanze diverse
 - In caso di disconnessione, il client tenta automaticamente la riconnessione al server
-- Lo sfondo della chat viene salvato sia nel file JSON della scheda che in `localStorage`, garantendo persistenza tra sessioni
+- Lo sfondo della chat viene salvato sia nel file JSON che in `localStorage`, garantendo persistenza tra sessioni
 
 ---
 
 *Progetto sviluppato come elaborato di maturità — Anno Scolastico 2025/2026*
 
 ---
+
 ---
 
 <br>
@@ -382,111 +370,108 @@ The application consists of a static frontend (HTML + CSS + JavaScript) and a Py
 
 ### Character Sheet
 - **Complete Character Information**: name, class, race, background, alignment, level, experience, age, height, weight, skin tone, hair color, eyes
-- **Ability Scores System**: Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma with automatic modifier calculation
-- **18 Skills** with proficiency and mastery tracking system:
+- **Ability Scores**: Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma with automatic modifier calculation
+- **18 Skills** with proficiency and expertise tracking:
   - Acrobatics, Animal Handling, Arcana, Athletics, Deception, History, Insight, Intimidation, Investigation, Medicine, Nature, Perception, Performance, Persuasion, Religion, Sleight of Hand, Stealth, Survival
   - Automatic modifier calculation based on linked ability score
-  - Proficiency tracking (2-state checkbox: proficiency and double proficiency/mastery)
-  
+  - Proficiency tracking (2-state checkbox: proficiency and expertise/double proficiency)
+
 - **Complete Combat System**:
-  - Hit Points: current, maximum, and temporary with visualization bars
+  - Hit Points: current, maximum, and temporary, with visualization bars
   - Base and temporary Armor Class
-  - Initiative calculated from Dexterity
+  - Initiative calculated from the Dexterity modifier
   - Customizable movement speed
   - Hit Dice with type selection (d4 → d20)
-  - **Death Saving Throws**: visual tracker for 3 successes and 3 failures per D&D 5e rules
-  
-- **Weapons**: name, attack bonus, damage formula (e.g., 1d8+2)
+  - **Death Saving Throws**: visual tracker for 3 successes and 3 failures
+
+- **Weapons**: name, attack bonus, damage formula (e.g., `1d8+2`)
 - **Character Images**: support for multiple images with forward/backward navigation and enlarged lightbox view
 
 ### Equipment and Notes
 - **150-slot Inventory**: complete management of items, weapons, armor, and equipment with visual space tracking
-- **Complete Monetary System** with five official D&D 5e currencies:
+- **Complete Monetary System** with the five official D&D 5e currencies:
   - Copper Pieces (CP)
   - Silver Pieces (SP)
   - Electrum Pieces (EP)
   - Gold Pieces (GP)
   - Platinum Pieces (PP)
-- **Traits and Features Section**: rich text area for documenting class privileges, background features, racial benefits, feats, and other special characteristics
-- **Player Notes**: personal space for annotations, personal objectives, secrets, and gameplay notes
+- **Traits and Features**: rich text area for documenting class features, background features, racial traits, feats, and other special abilities
+- **Player Notes**: personal space for annotations, personal objectives, secrets, and session notes
 
 ### Spells
-- **Spellcasting Ability Selection**: choose the primary stat (STR, DEX, CON, INT, WIS, CHA) with automatic calculation of spell save DC and spell attack bonus
-- **Cantrips**: dedicated section for unlimited cantrips with counter
-- **Spells by Level**: organization from 1st to 9th level with tab navigation
-  - Separate counters for known spells and prepared spells
-  - Spell slot tracking with used/available display per level
+- **Spellcasting Ability**: choose the primary ability score (STR, DEX, CON, INT, WIS, CHA) with automatic calculation of the Spell Save DC and Spell Attack Bonus
+- **Cantrips**: dedicated section with counter
+- **Spells by Level**: organized from 1st to 9th level with tab navigation
+  - Separate counters for known and prepared spells
+  - Spell slot tracking (used/available) per level
   - Progressive slot visualization for slot-based casters (wizard, sorcerer, cleric, etc.)
-- **Real-time Calculation**: spell DC and attack bonus automatically update when spellcasting ability changes
+- **Real-time Calculation**: Spell Save DC and Spell Attack Bonus update automatically when the spellcasting ability changes
 
 ### Maps
-- **Multiple Map Management**: load multiple maps for consultation during gameplay sessions
+- **Multiple Map Management**: load multiple maps for consultation during gameplay
 - **Two Visualization Modes**:
-  - **View Mode**: pure map consultation with already-placed markers
+  - **View Mode**: map consultation with already-placed markers
   - **Placement Mode**: interactive marker placement on maps
-  
+
 - **Categorized Marker System** with distinct colors:
   - 🟡 **Main Quest** (Yellow): main campaign quests
   - 🟣 **Personal Quest** (Purple): individual player side quests
   - 🟢 **Sub Quest** (Green): secondary missions
   - 🔵 **Shop** (Blue): shops, taverns, inns
   - 🔴 **Boss** (Red): important enemies, dungeons, dangerous zones
-  - 🩵 **Item** (Cyan): items, treasures, artifacts to collect
-  
-- **Marker Management**: click to place, rename via dedicated modal, deletion
-- **Control Panel**: legend with all marker types and complete list of all points on current map
-- **Standard Image Support**: PNG, JPG, WebP
+  - 🩵 **Item** (Cyan): items, treasures, and artifacts
+
+- **Marker Management**: click to place, rename via dedicated modal, delete
+- **Control Panel**: marker type legend and complete list of all points on the current map
+- **Supported Formats**: PNG, JPG, WebP
 
 ### Ability Scaling *(Homebrew Feature)*
 - **Skills Customization**: reconfigure which ability score governs each of the 18 skills
-- **Use Cases**: 
+- **Use Cases**:
   - Homebrew classes with alternative mechanics
   - Campaigns with specific house rules (e.g., Acrobatics based on WIS instead of DEX)
   - Modified game systems where skills follow different rules
-- **Interface**: for each skill, select from dropdown the ability to use
-- **Real-time Calculations**: skill modifiers automatically update when you change the association
+- For each skill, select the governing ability from a dropdown; modifiers update automatically in real time
 
 ### Dungeon Master
-- **NPC Statistics Panel**: complete management of NPCs and enemies independent from the player's character sheet
-  - HP and Armor Class
-  - Customizable initiative
-  - Proficiency bonus
+- **NPC Statistics Panel**: complete management of NPCs and enemies, independent from the player's character sheet
+  - Hit Points and Armor Class
+  - Customizable Initiative
+  - Proficiency Bonus
   - Six independent ability scores (STR, DEX, CON, INT, WIS, CHA) with automatic modifier calculation
-  
+
 - **Advanced Dice Calculator**:
   - Complete syntax: `2d6+4`, `1d20-1`, `3d8` (supports spaces and complex combinations)
   - Quick-roll buttons for standard dice (d4, d6, d8, d10, d12, d20, d100)
-  - **Visual Roll Log** for session consultation
+  - **Visual roll log** for session consultation
   - Shows total result and breakdown of each die
-  
-- **DM Image Gallery**: load images of monsters, enemies, NPCs, battle scenes, and artwork for display to players during gameplay
-- **Private Notes**: notes reserved for the Dungeon Master, plot hooks, story secrets, hidden statistics
+
+- **DM Image Gallery**: load images of monsters, NPCs, battle scenes, and artwork to display to players during gameplay
+- **Private Notes**: notes reserved for the Dungeon Master — plot hooks, story secrets, hidden statistics
 
 ### Party Chat *(Local Multiplayer)*
-- **Real-Time Connection**: WebSocket communication between players on the same LAN network
-- **Password-Protected Rooms**: each group creates their own room with custom password
+- **Real-Time Connection**: WebSocket communication between players on the same LAN
+- **Password-Protected Rooms**: each group creates their own room with a custom password
 - **Text Chat**: real-time messages visible to all room participants
 - **Image Sharing**: upload and display images directly in the chat (PNG, JPG, WebP)
 - **Integrated Dice Rolls**: `/roll` command to roll dice directly in the chat
-  - Ex: `/roll 2d20+5` rolls dice and shows result to everyone
+  - Ex: `/roll 2d20+5` — rolls dice and shows results to everyone
   - Supports the same syntax as the dice calculator
-  
 - **Connection Status**: visual Online/Offline indicator with immediate feedback
-- **Customizable Chat Background**: load a personalized image as chat background (persists across sessions)
+- **Customizable Chat Background**: personalized background image for the chat (persists across sessions)
 - **Auto-reconnection**: in case of connection loss, the client automatically attempts to reconnect
 - **Server IP Auto-detect**: button to automatically detect the server IP (requires server to be running)
 
 ### Cross-Cutting Features
-- **Save to File**: export the character sheet in JSON format with all data
-  - **Save** option: saves to the previous file (if available)
-  - **Save As** option: file picker to choose location and name
-  
+- **Save to File**: export the character sheet in JSON format
+  - **Save**: overwrites the previously opened file (if available)
+  - **Save As**: opens the file picker to choose location and name
 - **Load from File**: import previously saved character sheets at any time
-- **Automatic Auto-save**: backup every 60 seconds to the browser's `localStorage` (protection against accidental loss)
+- **Automatic Auto-save**: backup to the browser's `localStorage` every 60 seconds, as protection against accidental loss
 - **Backup Restore**: if the sheet is closed unexpectedly, on next opening the app offers to restore the last auto-save
-- **Full Reset**: button to erase all data and start fresh (requires confirmation)
-- **Light/Dark Theme**: switcher for Day Mode (light theme) and Night Mode (dark theme) with preference automatically saved
-- **Bilingual Localization**: real-time switch between Italian and English. All labels, buttons, tables change language instantly
+- **Full Reset**: erases all data and starts fresh (requires confirmation)
+- **Light/Dark Theme**: Day Mode / Night Mode switcher with preference saved automatically
+- **Bilingual Localization**: real-time switch between Italian and English — all labels, buttons, and tables change language instantly
 - **Image Lightbox**: click any image to enlarge it in full-screen mode
 
 ---
@@ -537,8 +522,6 @@ Communication between client and server takes place via JSON messages over **Web
 
 ### Desktop Executable Mode
 
-If you have downloaded the packaged version:
-
 - **Windows**: run `DiceRoll.exe` from the extracted folder
 
 ### To Use Party Chat
@@ -558,7 +541,7 @@ Party Chat requires the Python WebSocket server for local multiplayer:
 5. Open the program (browser or .exe) and navigate to the **PARTY** tab
 6. Enter the server IP (or use the **Auto-detect** button) and the room password
 
-> **Note on Network**: the server only works on **local LAN** (same WiFi/network). It requires Python to be installed on the system.
+> **Note on Network**: the server only works on **local LAN** (same WiFi/network) and requires Python to be installed on the system.
 
 ---
 
@@ -567,26 +550,26 @@ Party Chat requires the Python WebSocket server for local multiplayer:
 
 ### Saving and Loading
 
-- **Save**: saves the sheet to the previously opened file (if available) or opens the file picker
+- **Save**: overwrites the previously opened file (if available), otherwise opens the file picker
 - **Save As**: always opens the file picker to choose the file name and location
 - **Load**: opens a previously saved `.json` file
 - **Reset**: fully resets the character sheet (requires confirmation)
 
 On startup, if a recent auto-save containing actual data is found, the application will offer to restore it.
 
-**Save format:** Data is serialized in **JSON** format with the following main structure:
+**Save format:** Data is serialized in **JSON** format with the following structure:
 
 ```json
 {
   "character": {
     "info": { "name": "...", "class": "...", "race": "..." },
-    "abilities": { "STR": 10, "DEX": 10, ... },
-    "skills": { "ACROBATICS": { "mod": 0, "proficiency": false, "mastery": false }, ... },
+    "abilities": { "STR": 10, "DEX": 10, "...": "..." },
+    "skills": { "ACROBATICS": { "mod": 0, "proficiency": false, "mastery": false }, "...": "..." },
     "combat": { "hp": { "current": 10, "max": 10, "temp": 0 }, "ac": 10, "initiative": 0 },
-    "spells": { "ability": "INT", "slots": { "1": { "used": 0, "total": 0 }, ... } },
-    "equipment": { "items": [...], "coins": { "copper": 0, "silver": 0, ... } },
-    "images": { "character": [...], "dm": [...] },
-    "maps": { "images": [...], "markers": [...] },
+    "spells": { "ability": "INT", "slots": { "1": { "used": 0, "total": 0 }, "...": "..." } },
+    "equipment": { "items": ["..."], "coins": { "copper": 0, "silver": 0, "...": "..." } },
+    "images": { "character": ["..."], "dm": ["..."] },
+    "maps": { "images": ["..."], "markers": ["..."] },
     "notes": { "traits": "...", "playerNotes": "...", "dmNotes": "..." }
   },
   "settings": { "theme": "dark", "language": "eng", "particles": true },
@@ -594,23 +577,15 @@ On startup, if a recent auto-save containing actual data is found, the applicati
 }
 ```
 
-**Local persistence:** An automatic backup is saved to `localStorage` every 60 seconds. It's a non-destructive save; data is only recovered if the main file is unavailable.
-
-**Common Use Cases:**
-- Save your character sheet before each gaming session
-- Share the sheet between computers by loading the JSON file
-- Keep backup of the DM's plot in the private notes
-- Maintain multiple characters for different campaigns
+**Local persistence:** An automatic backup is saved to `localStorage` every 60 seconds. It is a non-destructive save; data is only proposed for recovery if the main file is unavailable.
 
 ### Network Configuration for Party Chat
 
 Party Chat uses WebSocket on port **8765**. To work properly on LAN:
 
-- All clients and server must be on the **same local network** (e.g., home WiFi)
+- All clients and the server must be on the **same local network** (e.g., home WiFi)
 - If a firewall is active, port `8765` (TCP) must be opened
-- The IP address must be one from the internal network (e.g., `192.168.X.X`, `10.0.X.X`, `172.16.X.X`)
-
-**For remote Internet use:** A tunnel (e.g., ngrok, Cloudflare Tunnel) or VPN must be configured, as the server is not designed for direct production use over the Internet.
+- The IP address must be a local network address (e.g., `192.168.X.X`, `10.0.X.X`, `172.16.X.X`)
 
 ### Party Chat
 
@@ -634,7 +609,7 @@ The supported syntax in the DM dice panel includes:
 ```
 2d6+4        → rolls 2d6 and adds 4
 1d20-1       → rolls 1d20 and subtracts 1
-3 d8         → rolls 3d8 showing each result individually
+3d8          → rolls 3d8 showing each result individually
 d20          → rolls a single d20
 ```
 
@@ -669,7 +644,7 @@ DiceRoll/
 <a name="custom-features-homebrew"></a>
 ## 🎮 Custom Features (Homebrew)
 
-Beyond the official D&D 5e rulebook mechanics, DiceRoll includes several features designed to enrich campaigns with custom house rules:
+Beyond the official D&D 5e rulebook mechanics, DiceRoll includes several features designed to support campaigns with custom house rules:
 
 - **Ability Scaling**: allows reconfiguring which ability score governs each skill, useful for homebrew classes or house rules
 - **Independent DM Panel**: the Dungeon Master has a full set of NPC statistics managed independently from the player's character sheet
