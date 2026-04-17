@@ -31,75 +31,113 @@ L'applicazione è composta da un frontend statico (HTML + CSS + JavaScript) e un
 ## ✨ Funzionalità
 
 ### Scheda Personaggio
-- Gestione completa delle **informazioni anagrafiche** del personaggio (nome, classe, razza, background, allineamento, livello, XP, caratteristiche fisiche)
-- Calcolo automatico dei **modificatori** per ciascuna delle sei caratteristiche principali (Forza, Destrezza, Costituzione, Intelligenza, Saggezza, Carisma)
-- Calcolo automatico di **tiri salvezza**, **abilità** e **percezione passiva** in base ai modificatori
-- Tracciamento di **competenze** e **maestrie** per le abilità
-- Gestione dei **punti ferita** (attuali, massimi, temporanei), della **Classe Armatura** (standard e temporanea) e dei **dadi vita**
-- Sistema di **tiri salvezza contro la morte** (3 successi / 3 fallimenti)
-- Gestione dell'**iniziativa** e della **velocità** di movimento
-- Sezione **armi** con nome, bonus all'attacco e formula del danno
-- Caricamento e visualizzazione di **immagini del personaggio** (più immagini, navigazione avanti/indietro)
+- **Informazioni anagrafiche complete**: nome, classe, razza, background, allineamento, livello, esperienza, età, altezza, peso, carnagione, capelli, occhi
+- **Sistema di caratteristiche (Ability Scores)**: Forza, Destrezza, Costituzione, Intelligenza, Saggezza, Carisma con calcolo automatico dei modificatori
+- **18 Abilità** con sistema di competenza e maestria:
+  - Acrobazia, Addestrare Animali, Arcano, Atletica, Attitudine al Gioco d'Azzardo, Consapevolezza, Destrezza dei Ladri, Furtività, Indagare, Ingannare, Intuizione, Medicina, Natura, Percezione, Prestazione, Provvedere, Religione, Sopravvivenza
+  - Calcolo automatico dei modificatori legati alla caratteristica
+  - Tracciamento proficienze (checkbox a 2 stati: normalità e maestria doppia)
+  
+- **Sistema di combattimento completo**:
+  - Punti Ferita attuali, massimi e temporanei con barre di visualizzazione
+  - Classe Armatura base e temporanea
+  - Iniziativa calcolata su Destrezza
+  - Velocità di movimento personalizzabile
+  - Dadi vita con selezione del tipo (d4 → d20)
+  - **Tiri salvezza contro la morte**: tracciamento visuale di 3 successi e 3 fallimenti per il sistema di morte
+  
+- **Armi**: nome, bonus all'attacco, formula del danno (es: 1d8+2)
+- **Immagini del personaggio**: supporto per multiple immagini con navigazione avanti/indietro e lightbox ingrandita
 
 ### Equipaggiamento e Appunti
-- Inventario con **150 slot** per oggetti ed equipaggiamento
-- Gestione delle **monete** nelle cinque valute del gioco (Rame, Argento, Electrum, Oro, Platino)
-- Area testuale per **tratti e caratteristiche** di classe e background
-- Area testuale per gli **appunti del giocatore**
+- **Inventario da 150 slot**: gestione completa di oggetti, armi, armature e equipaggiamento con conteggio visuale dello spazio disponibile
+- **Sistema monetario completo** con le cinque valute ufficiali di D&D 5e:
+  - Monete di Rame (MR)
+  - Monete d'Argento (MA)
+  - Monete d'Electrum (ME)
+  - Monete d'Oro (MO)
+  - Monete di Platino (MP)
+- **Sezione Tratti e Caratteristiche**: area testuale ricca per documenti i privilegi di classe, feature di background, benefici razziali, talenti e altre caratteristiche speciali
+- **Appunti del Giocatore**: spazio personale per annotazioni, obiettivi personali, segreti e note di gioco
 
 ### Incantesimi
-- Selezione della **caratteristica da incantatore** (FOR, DES, COS, INT, SAG, CAR)
-- Calcolo automatico della **CD degli incantesimi** e del **bonus all'attacco con incantesimi**
-- Contatori per trucchetti conosciuti, incantesimi conosciuti e incantesimi preparati
-- Gestione dei **trucchetti** (cantrip)
-- Gestione degli **incantesimi suddivisi per livello** (dal 1° al 9°) con navigazione a tab
-- Tracciamento degli **slot incantesimo** per livello (usati/disponibili)
+- **Caratteristica da incantatore**: selezione della statistica primaria (FOR, DES, COS, INT, SAG, CAR) con calcolo automatico della CD di salvataggio incantesimo e bonus all'attacco con incantesimi
+- **Trucchetti (Cantrip)**: sezione dedicata ai trucchetti illimitati con conteggio
+- **Incantesimi per Livello**: organizzazione da 1° a 9° livello con tab di navigazione
+  - Contatori separati per incantesimi conosciuti e incantesimi preparati
+  - Sistema di slot incantesimo con tracciamento usati/disponibili per ogni livello
+  - Visualizzazione progressiva degli slot per incantatori a slot (wizard, sorcerer, cleric, ecc.)
+- **Calcolo automatico**: CD degli incantesimi e bonus all'attacco aggiornati in tempo reale quando si modifica la caratteristica scelta
 
 ### Mappe
-- Caricamento di **immagini mappa** (supporto multiplo)
-- **Modalità visuale** per consultare la mappa
-- **Modalità piazzamento marker** con sei tipologie categorizzate:
-  - 🟡 Main Quest
-  - 🟣 Personal Quest
-  - 🟢 Sub Quest
-  - 🔵 Shop
-  - 🔴 Boss
-  - 🩵 Item
-- Gestione e rinomina dei marker tramite modale dedicato
-- Pannello **gestione marker** con legenda e lista completa
+- **Gestione mappa multiple**: caricamento di più mappe da consultare durante la sessione di gioco
+- **Due modalità di visualizzazione**:
+  - **Modalità Visuale**: consultazione pura della mappa con marker già posizionati
+  - **Modalità Piazzamento**: posizionamento di marcatori interattivi sulle mappe
+  
+- **Sistema di Marcatori Categorizzati** con colori distinti:
+  - 🟡 **Main Quest** (Giallo): quest principali della campagna
+  - 🟣 **Personal Quest** (Viola): quest personali dei giocatori
+  - 🟢 **Sub Quest** (Verde): missioni secondarie
+  - 🔵 **Shop** (Blu): negozi, taverne e locande
+  - 🔴 **Boss** (Rosso): nemici importanti, dungeon, zone pericolose
+  - 🩵 **Item** (Azzurro): oggetti, tesori, artefatti da raccogliere
+  
+- **Gestione marcatori**: clic per piazzare, rinomina tramite modale dedicato, eliminazione
+- **Pannello di controllo**: legenda con tutti i marker e lista completa visibile di tutti i punti sulla mappa corrente
+- **Supporto per immagini standard**: PNG, JPG, WebP
 
 ### Scaling Abilità *(Funzionalità Homebrew)*
-- Personalizzazione della **caratteristica base** per ciascuna delle 18 abilità di gioco
-- Consente di dissociare un'abilità dalla sua caratteristica standard (es: Acrobazia basata su INT invece di FOR)
-- Utile per campagne con regole personalizzate
+- **Personalizzazione delle Abilità**: riconfigura quale caratteristica governa ciascuna delle 18 abilità
+- **Casi d'uso**: 
+  - Classi homebrew con meccaniche alternative
+  - Campagne con house rules specifiche (es: Acrobazia basata su SAG invece di DES)
+  - Sistemi di gioco modificati dove le abilità seguono regole diverse
+- **Interfaccia**: per ogni abilità, seleziona dalla dropdown la caratteristica da usare
+- **Calcoli in tempo reale**: i modificatori di abilità si aggiornano automaticamente quando cambi l'associazione
 
 ### Dungeon Master
-- Pannello **statistiche NPC** con HP, CA, iniziativa, bonus competenza e sei caratteristiche indipendenti
-- **Calcolatore dadi** con sintassi estesa (`XdY+Z`, modificatori positivi e negativi)
-- Pulsanti rapidi per i dadi standard (d4, d6, d8, d10, d12, d20, d100)
-- Log visuale dei risultati dei tiri
-- Galleria **immagini DM** (per mostri, PNG, scene)
-- Area **appunti riservati** del Dungeon Master
+- **Pannello Statistiche NPC**: gestione completa di PNG e nemici indipendente dalla scheda del giocatore
+  - HP e Classe Armatura
+  - Iniziativa personalizzabile
+  - Bonus competenza
+  - Sei caratteristiche indipendenti (STR, DEX, CON, INT, WIS, CHA) con calcolo automatico modificatori
+  
+- **Calcolatore Dadi Avanzato**:
+  - Sintassi completa: `2d6+4`, `1d20-1`, `3d8` (supporta spazi e combinazioni complesse)
+  - Pulsanti rapidi per dadi standard (d4, d6, d8, d10, d12, d20, d100)
+  - **Log visuale** dei tiri per consultazione durante la sessione
+  - Mostra risultato totale e dettaglio di ogni dado
+  
+- **Galleria Immagini DM**: caricamento di immagini di mostri, nemici, PNG, scene di battaglia e illustrazioni per mostrare ai giocatori durante il gioco
+- **Appunti Riservati**: note private per il Dungeon Master, plothooks, segreti della trama, statistiche nascoste
 
-### Party Chat *(Multiplayer)*
-- Connessione a un server WebSocket locale o in rete LAN
-- Creazione e accesso alle stanze protette da **password**
-- **Chat testuale in tempo reale** tra i membri del party
-- Invio di **immagini** nella chat
-- Tiro dadi integrato nella chat tramite il comando `/roll` (es: `/roll 2d6+3`)
-- Indicatore di stato connessione (Online / Offline)
-- **Sfondo personalizzabile** per la finestra di chat (persistente tra sessioni)
-- Riconnessione automatica in caso di perdita del segnale
-- **Auto-detect IP server** tramite pulsante dedicato (richiede server avviato)
+### Party Chat *(Multiplayer Locale)*
+- **Connessione in Tempo Reale**: comunicazione WebSocket tra giocatori sulla stessa rete LAN
+- **Stanze Protette da Password**: ogni gruppo crea la propria stanza con password personalizzata
+- **Chat Testuale**: messaggi in tempo reale visibili a tutti i partecipanti della stanza
+- **Condivisione Immagini**: caricamento e visualizzazione di immagini direttamente nella chat (PNG, JPG, WebP)
+- **Tiri Dadi Integrati**: comando `/roll` per lanciare dadi direttamente nella chat
+  - Es: `/roll 2d20+5` lancia i dadi e mostra il risultato a tutti
+  - Supporta la stessa sintassi del calcolatore dadi
+  
+- **Stato Connessione**: indicatore visuale Online/Offline con feedback immediato
+- **Sfondo Chat Personalizzabile**: carica un'immagine personalizzata come sfondo della chat (persiste tra sessioni)
+- **Auto-riconnessione**: in caso di perdita di connessione, il client tenta automaticamente di riconnettersi
+- **Auto-detect IP Server**: pulsante per rilevare automaticamente l'IP del server (richiede server avviato)
 
 ### Funzionalità Trasversali
-- **Salvataggio** su file JSON (tramite File System Access API o download diretto)
-- **Caricamento** di schede precedentemente salvate
-- **Autosalvataggio** automatico ogni 60 secondi su `localStorage`
-- **Reset** completo della scheda
-- **Tema chiaro/scuro** (Day Mode / Night Mode), con preferenza salvata
-- **Localizzazione bilingue** (Italiano / Inglese) con switch in tempo reale
-- Lightbox per visualizzazione ingrandita delle immagini
+- **Salvataggio su File**: export della scheda in formato JSON con tutti i dati
+  - Opzione **Salva**: salva nel file precedente (se disponibile)
+  - Opzione **Salva con Nome**: selettore file per scegliere posizione e nome
+  
+- **Caricamento da File**: import di schede precedentemente salvate in qualsiasi momento
+- **Autosalvataggio Automatico**: backup ogni 60 secondi su `localStorage` del browser (protezione contro perdite accidentali)
+- **Ripristino da Backup**: se la scheda viene chiusa improvvisamente, all'apertura successiva l'app propone di ripristinare l'ultimo autosalvataggio
+- **Reset Completo**: pulsante per cancellare tutti i dati e ricominciare da zero (richiede conferma)
+- **Tema Chiaro/Scuro**: switcher per Day Mode (tema chiaro) e Night Mode (tema scuro) con preferenza salvata automaticamente
+- **Localizzazione Bilingue**: switch in tempo reale tra italiano e inglese. Tutte le label, pulsanti, tabelle cambiano lingua istantaneamente
+- **Lightbox per Immagini**: click su qualsiasi immagine per ingrandirla in modalità schermo intero
 
 ---
 
@@ -147,43 +185,30 @@ La comunicazione tra client e server avviene tramite messaggi JSON su **WebSocke
 <a name="installazione-e-avvio"></a>
 ## ⚙️ Installazione e Avvio
 
-### Prerequisiti
-- Un browser moderno (Chrome 86+, Edge 86+, Firefox 90+)
-- Python 3.8+ (solo per la funzionalità Party Chat)
-- Libreria `websockets` per Python
+### Modalità Eseguibile Desktop
 
-### Installazione dipendenze Python
 
-```bash
-pip install websockets
-```
+- **Windows**: eseguire `DiceRoll.exe` dalla cartella estratta
 
-### Avvio del server Party Chat
 
-```bash
-python server.py
-```
+### Per usare la Party Chat
 
-Il server si avvierà sulla porta `8765` e stamperà l'indirizzo IP locale da condividere con i membri del party.
+La Party Chat richiede il server Python per il multiplayer locale:
 
-```
-============================================================
-🚀 SERVER CHAT D&D - AVVIATO
-============================================================
-📡 WebSocket in ascolto su: 0.0.0.0:8765
-🌐 IP locale del server: 192.168.X.X
-ℹ️  Info endpoint: http://192.168.X.X:8766/info
+1. **Prerequisiti**: Python 3.8+ installato
+2. **Installare la libreria WebSocket**:
+   ```bash
+   pip install websockets
+   ```
+3. **Avviare il server** (nella cartella del progetto):
+   ```bash
+   python server/server.py
+   ```
+4. Il server stamperà l'IP locale da condividere con gli altri giocatori
+5. Aprire il programma (browser o .exe) e navigare alla tab **PARTY**
+6. Inserire l'IP del server (o usare il pulsante **Auto-detect**) e la password della stanza
 
-📌 I client devono connettersi a: 192.168.X.X
-💡 Nel campo 'IP Server' inserire: 192.168.X.X
-============================================================
-```
-
-### Avvio del client
-
-È sufficiente aprire `index.html` in un browser. Per la Party Chat, inserire l'IP del server nell'apposito campo (o usare il pulsante **Auto-detect**) prima di creare o unirsi a una stanza.
-
-> **Nota:** l'applicazione è progettata per uso **desktop-only**. L'esperienza su mobile non è supportata.
+> **Nota sulla rete**: il server funziona solo su **LAN locale** (stessa WiFi/rete). Richiede Python installato nel sistema.
 
 ---
 
@@ -199,13 +224,58 @@ Il server si avvierà sulla porta `8765` e stamperà l'indirizzo IP locale da co
 
 All'apertura, se è presente un autosalvataggio recente **con dati**, l'applicazione propone di ripristinarlo.
 
+**Formato di salvataggio:** I dati vengono serializzati in formato **JSON** con la seguente struttura principale:
+
+```json
+{
+  "character": {
+    "info": { "name": "...", "class": "...", "race": "..." },
+    "abilities": { "STR": 10, "DEX": 10, ... },
+    "skills": { "ACROBATICS": { "mod": 0, "proficiency": false, "mastery": false }, ... },
+    "combat": { "hp": { "current": 10, "max": 10, "temp": 0 }, "ac": 10, "initiative": 0 },
+    "spells": { "ability": "INT", "slots": { "1": { "used": 0, "total": 0 }, ... } },
+    "equipment": { "items": [...], "coins": { "copper": 0, "silver": 0, ... } },
+    "images": { "character": [...], "dm": [...] },
+    "maps": { "images": [...], "markers": [...] },
+    "notes": { "traits": "...", "playerNotes": "...", "dmNotes": "..." }
+  },
+  "settings": { "theme": "dark", "language": "ita", "particles": true },
+  "timestamp": "2026-04-17T10:30:00Z"
+}
+```
+
+**Persistenza locale:** Un backup automatico viene salvato in `localStorage` ogni 60 secondi. È un salvataggio non distruttivo; i dati vengono recuperati solo se il file principale non è disponibile.
+
+**Casi d'uso comuni:**
+- Salvare la scheda di una campagna prima di ogni sessione di gioco
+- Condividere la scheda tra computer caricando il file JSON
+- Mantenere backup della trama del DM negli appunti riservati
+- Conservare più personaggi per campagne diverse
+
+### Configurazione di rete per Party Chat
+
+La Party Chat utilizza WebSocket su porta **8765**. Per funzionare correttamente su LAN:
+
+- Tutti i client e il server devono trovarsi sulla **stessa rete locale** (es: WiFi della casa)
+- Se il firewall è attivo, è necessario aprire la porta `8765` (TCP)
+- L'indirizzo IP deve essere uno della rete interna (es: `192.168.X.X`, `10.0.X.X`, `172.16.X.X`)
+
+**Per uso su Internet remoto:** è necessario configurare un tunnel (es: ngrok, Cloudflare Tunnel) o VPN, in quanto il server non è progettato per uso diretto in produzione su Internet.
+
 ### Party Chat
 
-1. Avviare `server.py` sulla macchina che funge da server
+1. Avviare `python server/server.py` sulla macchina che funge da server
 2. Tutti i giocatori aprono `index.html` e navigano nella tab **PARTY**
 3. Inserire nickname, password della stanza e IP del server (o cliccare **Auto-detect**)
 4. Il primo giocatore clicca **Crea Party**; gli altri cliccano **Unisciti al Party**
 5. Nella chat è possibile scrivere messaggi, inviare immagini e usare `/roll XdY+Z`
+
+**Messaggi WebSocket supportati:**
+- `create`: crea una nuova stanza (richiede password e nickname)
+- `join`: accede a una stanza esistente (richiede password e nickname)
+- `message`: invia un messaggio di testo o immagine a tutti nella stanza
+- `leave`: abbandona la stanza e si disconnette
+- `ping/pong`: heartbeat per mantenere la connessione attiva (automatico)
 
 ### Calcolatore Dadi
 
@@ -225,17 +295,23 @@ d20          → tira un singolo dado da 20
 
 ```
 DiceRoll/
-├── index.html          → Pagina principale dell'applicazione
-├── style.css           → Foglio di stile personalizzato
-├── script.js           → Logica JavaScript completa
-├── server.py           → Server WebSocket per Party Chat
-├── README.md           → Documentazione del progetto
-├── lang/
-│   ├── ita.js          → Traduzioni in italiano
-│   └── eng.js          → Traduzioni in inglese
-└── img/
-    ├── icon.png         → Icona dell'applicazione
-    └── bgChat.png       → Sfondo predefinito della chat
+├── client/
+│   ├── index.html       → Pagina principale dell'applicazione
+│   ├── style.css        → Foglio di stile personalizzato
+│   ├── script.js        → Logica JavaScript completa
+│   ├── main.js          → Entry point Electron
+│   ├── package.json     → Dipendenze e configurazione npm
+│   ├── forge.config.js  → Configurazione Electron Forge
+│   ├── lang/
+│   │   ├── ita.js       → Traduzioni in italiano
+│   │   └── eng.js       → Traduzioni in inglese
+│   └── img/
+│       ├── icon.png     → Icona dell'applicazione
+│       └── bgChat.png   → Sfondo predefinito della chat
+├── server/
+│   └── server.py        → Server WebSocket per Party Chat
+├── README.md            → Documentazione del progetto
+└── LICENSE              → Licenza del progetto
 ```
 
 ---
@@ -305,75 +381,113 @@ The application consists of a static frontend (HTML + CSS + JavaScript) and a Py
 ## ✨ Features
 
 ### Character Sheet
-- Full management of **character information** (name, class, race, background, alignment, level, XP, physical traits)
-- Automatic calculation of **ability modifiers** for each of the six core attributes (Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma)
-- Automatic calculation of **saving throws**, **skills**, and **passive perception** based on modifiers
-- Tracking of **proficiencies** and **masteries** for skills
-- Management of **hit points** (current, maximum, temporary), **Armor Class** (base and temporary), and **hit dice**
-- **Death saving throws** tracker (3 successes / 3 failures)
-- **Initiative** and **movement speed** management
-- **Weapons** section with name, attack bonus, and damage formula
-- Loading and display of **character images** (multiple images, forward/backward navigation)
+- **Complete Character Information**: name, class, race, background, alignment, level, experience, age, height, weight, skin tone, hair color, eyes
+- **Ability Scores System**: Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma with automatic modifier calculation
+- **18 Skills** with proficiency and mastery tracking system:
+  - Acrobatics, Animal Handling, Arcana, Athletics, Deception, History, Insight, Intimidation, Investigation, Medicine, Nature, Perception, Performance, Persuasion, Religion, Sleight of Hand, Stealth, Survival
+  - Automatic modifier calculation based on linked ability score
+  - Proficiency tracking (2-state checkbox: proficiency and double proficiency/mastery)
+  
+- **Complete Combat System**:
+  - Hit Points: current, maximum, and temporary with visualization bars
+  - Base and temporary Armor Class
+  - Initiative calculated from Dexterity
+  - Customizable movement speed
+  - Hit Dice with type selection (d4 → d20)
+  - **Death Saving Throws**: visual tracker for 3 successes and 3 failures per D&D 5e rules
+  
+- **Weapons**: name, attack bonus, damage formula (e.g., 1d8+2)
+- **Character Images**: support for multiple images with forward/backward navigation and enlarged lightbox view
 
 ### Equipment and Notes
-- Inventory with **150 slots** for items and gear
-- Management of **currencies** across the five in-game denominations (Copper, Silver, Electrum, Gold, Platinum)
-- Text area for **traits and class/background features**
-- Text area for **player notes**
+- **150-slot Inventory**: complete management of items, weapons, armor, and equipment with visual space tracking
+- **Complete Monetary System** with five official D&D 5e currencies:
+  - Copper Pieces (CP)
+  - Silver Pieces (SP)
+  - Electrum Pieces (EP)
+  - Gold Pieces (GP)
+  - Platinum Pieces (PP)
+- **Traits and Features Section**: rich text area for documenting class privileges, background features, racial benefits, feats, and other special characteristics
+- **Player Notes**: personal space for annotations, personal objectives, secrets, and gameplay notes
 
 ### Spells
-- Selection of the **spellcasting ability** (STR, DEX, CON, INT, WIS, CHA)
-- Automatic calculation of the **spell save DC** and **spell attack bonus**
-- Counters for known cantrips, known spells, and prepared spells
-- Management of **cantrips**
-- Management of **spells organized by level** (1st through 9th) with tab navigation
-- Tracking of **spell slots** per level (used/available)
+- **Spellcasting Ability Selection**: choose the primary stat (STR, DEX, CON, INT, WIS, CHA) with automatic calculation of spell save DC and spell attack bonus
+- **Cantrips**: dedicated section for unlimited cantrips with counter
+- **Spells by Level**: organization from 1st to 9th level with tab navigation
+  - Separate counters for known spells and prepared spells
+  - Spell slot tracking with used/available display per level
+  - Progressive slot visualization for slot-based casters (wizard, sorcerer, cleric, etc.)
+- **Real-time Calculation**: spell DC and attack bonus automatically update when spellcasting ability changes
 
 ### Maps
-- Loading of **map images** (multiple maps supported)
-- **View mode** for consulting the map
-- **Marker placement mode** with six categorized types:
-  - 🟡 Main Quest
-  - 🟣 Personal Quest
-  - 🟢 Sub Quest
-  - 🔵 Shop
-  - 🔴 Boss
-  - 🩵 Item
-- Marker management and renaming via a dedicated modal
-- **Marker management panel** with legend and full list view
+- **Multiple Map Management**: load multiple maps for consultation during gameplay sessions
+- **Two Visualization Modes**:
+  - **View Mode**: pure map consultation with already-placed markers
+  - **Placement Mode**: interactive marker placement on maps
+  
+- **Categorized Marker System** with distinct colors:
+  - 🟡 **Main Quest** (Yellow): main campaign quests
+  - 🟣 **Personal Quest** (Purple): individual player side quests
+  - 🟢 **Sub Quest** (Green): secondary missions
+  - 🔵 **Shop** (Blue): shops, taverns, inns
+  - 🔴 **Boss** (Red): important enemies, dungeons, dangerous zones
+  - 🩵 **Item** (Cyan): items, treasures, artifacts to collect
+  
+- **Marker Management**: click to place, rename via dedicated modal, deletion
+- **Control Panel**: legend with all marker types and complete list of all points on current map
+- **Standard Image Support**: PNG, JPG, WebP
 
 ### Ability Scaling *(Homebrew Feature)*
-- Customization of the **base ability** for each of the 18 in-game skills
-- Allows dissociating a skill from its standard attribute (e.g., Acrobatics based on INT instead of STR)
-- Useful for campaigns with custom house rules
+- **Skills Customization**: reconfigure which ability score governs each of the 18 skills
+- **Use Cases**: 
+  - Homebrew classes with alternative mechanics
+  - Campaigns with specific house rules (e.g., Acrobatics based on WIS instead of DEX)
+  - Modified game systems where skills follow different rules
+- **Interface**: for each skill, select from dropdown the ability to use
+- **Real-time Calculations**: skill modifiers automatically update when you change the association
 
 ### Dungeon Master
-- **NPC statistics panel** with HP, AC, initiative, proficiency bonus, and six independent ability scores
-- **Dice calculator** with extended syntax (`XdY+Z`, positive and negative modifiers)
-- Quick-roll buttons for standard dice (d4, d6, d8, d10, d12, d20, d100)
-- Visual log of roll results
-- **DM image gallery** (for monsters, NPCs, scenes)
-- **Private notes** area reserved for the Dungeon Master
+- **NPC Statistics Panel**: complete management of NPCs and enemies independent from the player's character sheet
+  - HP and Armor Class
+  - Customizable initiative
+  - Proficiency bonus
+  - Six independent ability scores (STR, DEX, CON, INT, WIS, CHA) with automatic modifier calculation
+  
+- **Advanced Dice Calculator**:
+  - Complete syntax: `2d6+4`, `1d20-1`, `3d8` (supports spaces and complex combinations)
+  - Quick-roll buttons for standard dice (d4, d6, d8, d10, d12, d20, d100)
+  - **Visual Roll Log** for session consultation
+  - Shows total result and breakdown of each die
+  
+- **DM Image Gallery**: load images of monsters, enemies, NPCs, battle scenes, and artwork for display to players during gameplay
+- **Private Notes**: notes reserved for the Dungeon Master, plot hooks, story secrets, hidden statistics
 
-### Party Chat *(Multiplayer)*
-- Connection to a local or LAN WebSocket server
-- Room creation and access protected by **password**
-- **Real-time text chat** between party members
-- **Image sharing** in the chat
-- Integrated dice rolling in the chat using the `/roll` command (e.g., `/roll 2d6+3`)
-- Connection status indicator (Online / Offline)
-- **Customizable chat background** (persistent across sessions)
-- Automatic reconnection in case of connection loss
-- **Server IP auto-detect** via a dedicated button (requires server to be running)
+### Party Chat *(Local Multiplayer)*
+- **Real-Time Connection**: WebSocket communication between players on the same LAN network
+- **Password-Protected Rooms**: each group creates their own room with custom password
+- **Text Chat**: real-time messages visible to all room participants
+- **Image Sharing**: upload and display images directly in the chat (PNG, JPG, WebP)
+- **Integrated Dice Rolls**: `/roll` command to roll dice directly in the chat
+  - Ex: `/roll 2d20+5` rolls dice and shows result to everyone
+  - Supports the same syntax as the dice calculator
+  
+- **Connection Status**: visual Online/Offline indicator with immediate feedback
+- **Customizable Chat Background**: load a personalized image as chat background (persists across sessions)
+- **Auto-reconnection**: in case of connection loss, the client automatically attempts to reconnect
+- **Server IP Auto-detect**: button to automatically detect the server IP (requires server to be running)
 
 ### Cross-Cutting Features
-- **Save** to JSON file (via File System Access API or direct download)
-- **Load** previously saved character sheets
-- **Auto-save** every 60 seconds to `localStorage`
-- Full **reset** of the character sheet
-- **Light/dark theme** (Day Mode / Night Mode), with saved preference
-- **Bilingual localization** (Italian / English) with real-time switching
-- Lightbox for enlarged image viewing
+- **Save to File**: export the character sheet in JSON format with all data
+  - **Save** option: saves to the previous file (if available)
+  - **Save As** option: file picker to choose location and name
+  
+- **Load from File**: import previously saved character sheets at any time
+- **Automatic Auto-save**: backup every 60 seconds to the browser's `localStorage` (protection against accidental loss)
+- **Backup Restore**: if the sheet is closed unexpectedly, on next opening the app offers to restore the last auto-save
+- **Full Reset**: button to erase all data and start fresh (requires confirmation)
+- **Light/Dark Theme**: switcher for Day Mode (light theme) and Night Mode (dark theme) with preference automatically saved
+- **Bilingual Localization**: real-time switch between Italian and English. All labels, buttons, tables change language instantly
+- **Image Lightbox**: click any image to enlarge it in full-screen mode
 
 ---
 
@@ -421,43 +535,30 @@ Communication between client and server takes place via JSON messages over **Web
 <a name="installation-and-setup"></a>
 ## ⚙️ Installation and Setup
 
-### Prerequisites
-- A modern browser (Chrome 86+, Edge 86+, Firefox 90+)
-- Python 3.8+ (only required for the Party Chat feature)
-- The `websockets` Python library
+### Desktop Executable Mode
 
-### Installing Python Dependencies
+If you have downloaded the packaged version:
 
-```bash
-pip install websockets
-```
+- **Windows**: run `DiceRoll.exe` from the extracted folder
 
-### Starting the Party Chat Server
+### To Use Party Chat
 
-```bash
-python server.py
-```
+Party Chat requires the Python WebSocket server for local multiplayer:
 
-The server will start on port `8765` and print the local IP address to share with party members.
+1. **Prerequisites**: Python 3.8+ installed on your system
+2. **Install WebSocket library**:
+   ```bash
+   pip install websockets
+   ```
+3. **Start the server** (from the project folder):
+   ```bash
+   python server/server.py
+   ```
+4. The server will print the local IP to share with other players
+5. Open the program (browser or .exe) and navigate to the **PARTY** tab
+6. Enter the server IP (or use the **Auto-detect** button) and the room password
 
-```
-============================================================
-🚀 D&D CHAT SERVER - STARTED
-============================================================
-📡 WebSocket listening on: 0.0.0.0:8765
-🌐 Server local IP: 192.168.X.X
-ℹ️  Info endpoint: http://192.168.X.X:8766/info
-
-📌 Clients should connect to: 192.168.X.X
-💡 Enter in the 'Server IP' field: 192.168.X.X
-============================================================
-```
-
-### Starting the Client
-
-Simply open `index.html` in a browser. For the Party Chat, enter the server IP in the appropriate field (or use the **Auto-detect** button) before creating or joining a room.
-
-> **Note:** The application is designed for **desktop use only**. Mobile experience is not supported.
+> **Note on Network**: the server only works on **local LAN** (same WiFi/network). It requires Python to be installed on the system.
 
 ---
 
@@ -473,13 +574,58 @@ Simply open `index.html` in a browser. For the Party Chat, enter the server IP i
 
 On startup, if a recent auto-save containing actual data is found, the application will offer to restore it.
 
+**Save format:** Data is serialized in **JSON** format with the following main structure:
+
+```json
+{
+  "character": {
+    "info": { "name": "...", "class": "...", "race": "..." },
+    "abilities": { "STR": 10, "DEX": 10, ... },
+    "skills": { "ACROBATICS": { "mod": 0, "proficiency": false, "mastery": false }, ... },
+    "combat": { "hp": { "current": 10, "max": 10, "temp": 0 }, "ac": 10, "initiative": 0 },
+    "spells": { "ability": "INT", "slots": { "1": { "used": 0, "total": 0 }, ... } },
+    "equipment": { "items": [...], "coins": { "copper": 0, "silver": 0, ... } },
+    "images": { "character": [...], "dm": [...] },
+    "maps": { "images": [...], "markers": [...] },
+    "notes": { "traits": "...", "playerNotes": "...", "dmNotes": "..." }
+  },
+  "settings": { "theme": "dark", "language": "eng", "particles": true },
+  "timestamp": "2026-04-17T10:30:00Z"
+}
+```
+
+**Local persistence:** An automatic backup is saved to `localStorage` every 60 seconds. It's a non-destructive save; data is only recovered if the main file is unavailable.
+
+**Common Use Cases:**
+- Save your character sheet before each gaming session
+- Share the sheet between computers by loading the JSON file
+- Keep backup of the DM's plot in the private notes
+- Maintain multiple characters for different campaigns
+
+### Network Configuration for Party Chat
+
+Party Chat uses WebSocket on port **8765**. To work properly on LAN:
+
+- All clients and server must be on the **same local network** (e.g., home WiFi)
+- If a firewall is active, port `8765` (TCP) must be opened
+- The IP address must be one from the internal network (e.g., `192.168.X.X`, `10.0.X.X`, `172.16.X.X`)
+
+**For remote Internet use:** A tunnel (e.g., ngrok, Cloudflare Tunnel) or VPN must be configured, as the server is not designed for direct production use over the Internet.
+
 ### Party Chat
 
-1. Start `server.py` on the machine acting as the server
+1. Start `python server/server.py` on the machine acting as the server
 2. All players open `index.html` and navigate to the **PARTY** tab
 3. Each player enters their nickname, the room password, and the server IP (or click **Auto-detect**)
-4. The first player clicks **Create Party**; the others click **Join Party**
+4. The first player clicks **Create Party**; others click **Join Party**
 5. Inside the chat, players can send messages, share images, and use `/roll XdY+Z`
+
+**Supported WebSocket messages:**
+- `create`: creates a new room (requires password and nickname)
+- `join`: joins an existing room (requires password and nickname)
+- `message`: sends a text or image message to all in the room
+- `leave`: leaves the room and disconnects
+- `ping/pong`: heartbeat to keep the connection alive (automatic)
 
 ### Dice Calculator
 
@@ -499,17 +645,23 @@ d20          → rolls a single d20
 
 ```
 DiceRoll/
-├── index.html          → Main application page
-├── style.css           → Custom stylesheet
-├── script.js           → Complete JavaScript logic
-├── server.py           → WebSocket server for Party Chat
-├── README.md           → Project documentation
-├── lang/
-│   ├── ita.js          → Italian translations
-│   └── eng.js          → English translations
-└── img/
-    ├── icon.png         → Application icon
-    └── bgChat.png       → Default chat background
+├── client/
+│   ├── index.html       → Main application page
+│   ├── style.css        → Custom stylesheet
+│   ├── script.js        → Complete JavaScript logic
+│   ├── main.js          → Electron entry point
+│   ├── package.json     → npm dependencies and configuration
+│   ├── forge.config.js  → Electron Forge configuration
+│   ├── lang/
+│   │   ├── ita.js       → Italian translations
+│   │   └── eng.js       → English translations
+│   └── img/
+│       ├── icon.png     → Application icon
+│       └── bgChat.png   → Default chat background
+├── server/
+│   └── server.py        → WebSocket server for Party Chat
+├── README.md            → Project documentation
+└── LICENSE              → Project license
 ```
 
 ---
