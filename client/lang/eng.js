@@ -37,6 +37,8 @@ window.translationsEng = {
     "dayMode": "Day Mode",
     "italiano": "Italiano",
     "english": "English",
+    "particles": "Particle Effects",
+    "particlesDesc": "Show ambient visual effects",
     "faq": "FAQ & Guide",
     "faqDesc": "README on GitHub",
     "faqBtn": "📖 Open",

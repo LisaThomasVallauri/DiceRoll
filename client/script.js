@@ -210,6 +210,21 @@ async function toggleLang(checkbox) {
     applyTranslations();
 }
 
+function toggleParticles(checkbox) {
+    const enabled = checkbox.checked;
+    const particlesContainer = document.querySelector('.ambient-particles');
+    
+    if (enabled) {
+        if (particlesContainer) particlesContainer.style.display = 'block';
+        document.getElementById('particlesLabel').textContent = t('settings.particlesDesc');
+    } else {
+        if (particlesContainer) particlesContainer.style.display = 'none';
+        document.getElementById('particlesLabel').textContent = '❌ ' + t('settings.particlesDesc');
+    }
+    
+    try { localStorage.setItem('dnd_particles', enabled ? 'true' : 'false'); } catch(e) {}
+}
+
 // ==================== GENERIC ALERT / CONFIRM MODALS ====================
 
 function showAlertModal(message) {
@@ -803,6 +818,15 @@ function initializeVisualEffects() {
     
     // Apply particle effects to dice buttons
     applyParticleEffects();
+    
+    // Apply saved particles state
+    try {
+        const savedParticles = localStorage.getItem('dnd_particles');
+        if (savedParticles === 'false') {
+            const particlesContainer = document.querySelector('.ambient-particles');
+            if (particlesContainer) particlesContainer.style.display = 'none';
+        }
+    } catch(e) {}
 }
 
 // ==================== DICE ROLLING ====================
@@ -2748,6 +2772,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error loading translations:', e);
         await loadTranslations('ita');
     }
+
+    // Restore saved particles state
+    try {
+        const savedParticles = localStorage.getItem('dnd_particles');
+        const particlesToggle = document.getElementById('particlesToggle');
+        if (particlesToggle && savedParticles === 'false') {
+            particlesToggle.checked = false;
+        }
+    } catch(e) {}
 
     initializeAbilities();
     initializeSaves();
