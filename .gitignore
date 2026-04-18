@@ -4,7 +4,6 @@ client/node_modules/
 
 # Cartelle di Build
 out/
-client/out/
 dist/
 
 # File di sistema e log
