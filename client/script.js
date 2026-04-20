@@ -83,13 +83,26 @@ let heartbeatInterval = null;
 let currentLang = 'ita';
 let translations = {};
 
-// File handle for save/load
+// File handle / file path for save/load
 let currentFileHandle = null;
+let currentFilePath = null;
 
 // ==================== UTILITY FUNCTIONS ====================
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function writeDataToPath(filePath, data) {
+    if (!filePath || !window.electronAPI?.saveFile) return false;
+    try {
+        const json = JSON.stringify(data, null, 2);
+        const result = await window.electronAPI.saveFile(filePath, json);
+        return result?.success === true;
+    } catch (err) {
+        console.warn('writeDataToPath failed:', err);
+        return false;
+    }
 }
 
 function escapeHtml(text) {
@@ -1060,6 +1073,17 @@ async function saveData() {
         }
     }
 
+    if (currentFilePath) {
+        const saved = await writeDataToPath(currentFilePath, data);
+        if (saved) {
+            hideLoading();
+            showSaveIndicator();
+            if (activeTabBtn) activeTabBtn.click();
+            return;
+        }
+        currentFilePath = null;
+    }
+
     hideLoading();
     await saveDataAs();
     if (activeTabBtn) activeTabBtn.click();
@@ -1076,6 +1100,20 @@ async function saveDataAs() {
     await delay(400);
     hideLoading();
 
+    if (window.electronAPI?.saveFileAs) {
+        try {
+            const result = await window.electronAPI.saveFileAs(json, defaultName);
+            if (!result) return;
+            if (result.success && result.filePath) {
+                currentFilePath = result.filePath;
+                currentFileHandle = null;
+                return;
+            }
+        } catch (err) {
+            console.warn('Electron saveFileAs failed:', err);
+        }
+    }
+
     if (window.showSaveFilePicker) {
         try {
             const handle = await window.showSaveFilePicker({
@@ -1090,6 +1128,7 @@ async function saveDataAs() {
             await writable.write(blob);
             await writable.close();
             currentFileHandle = handle;
+            currentFilePath = null;
             startPermissionKeepalive();
             await delay(300);
             hideLoading();
@@ -1187,6 +1226,26 @@ async function loadData() {
     }
     // --- End protection ---
 
+    if (window.electronAPI?.openFile) {
+        try {
+            const result = await window.electronAPI.openFile();
+            if (!result) return;
+            showLoading(t('loading.loadingSheet'));
+            const data = JSON.parse(result.content);
+            setAllData(data);
+            currentFileHandle = null;
+            currentFilePath = result.filePath;
+            await delay(500);
+            hideLoading();
+            return;
+        } catch (err) {
+            hideLoading();
+            if (err.name === 'AbortError') return;
+            showAlertModal(t('alerts.loadError') + err.message);
+            return;
+        }
+    }
+
     if (window.showOpenFilePicker) {
         try {
             const [handle] = await window.showOpenFilePicker({
@@ -1201,6 +1260,7 @@ async function loadData() {
             const data = JSON.parse(text);
             setAllData(data);
             currentFileHandle = handle;
+            currentFilePath = null;
             startPermissionKeepalive();
             await delay(500);
             hideLoading();
@@ -1232,6 +1292,8 @@ async function loadData() {
                     }
                 } catch(e) {}
                 setAllData(data);
+                currentFileHandle = null;
+                currentFilePath = null;
                 // Since we have no file handle, keep localStorage in sync
                 try { localStorage.setItem('dnd_autosave_backup', JSON.stringify(data)); } catch(e) {}
                 await delay(500);
@@ -1994,10 +2056,19 @@ function closeLightbox(event) {
 // ==================== TRANSLATIONS ====================
 
 function loadTranslations(lang) {
+  const globalVar = lang === 'ita' ? 'translationsIta' : 'translationsEng';
+  
+  // Se la variabile globale è già disponibile (script incluso staticamente), usala subito
+  if (window[globalVar]) {
+    translations = window[globalVar];
+    currentLang = lang;
+    try { localStorage.setItem('dnd_lang', lang); } catch(e) {}
+    return Promise.resolve();
+  }
+
+  // Altrimenti carica dinamicamente
   return new Promise((resolve, reject) => {
     const scriptFile = `lang/${lang}.js`;
-    const globalVar = lang === 'ita' ? 'translationsIta' : 'translationsEng';
-
     const oldScript = document.querySelector(`script[data-lang="${lang}"]`);
     if (oldScript) oldScript.remove();
 
@@ -2008,7 +2079,7 @@ function loadTranslations(lang) {
       if (window[globalVar]) {
         translations = window[globalVar];
         currentLang = lang;
-        localStorage.setItem('dnd_lang', lang);
+        try { localStorage.setItem('dnd_lang', lang); } catch(e) {}
         resolve();
       } else {
         reject(new Error(`Global variable ${globalVar} not found`));
@@ -2242,17 +2313,40 @@ async function autoSave() {
                     saveBtn.style.background = '';
                 }, 800);
             }
-        } else {
-            console.warn("Autosave: file handle non valido, salvataggio su localStorage.");
-            currentFileHandle = null;
-            stopPermissionKeepalive();
-            try { localStorage.setItem('dnd_autosave_backup', JSON.stringify(data)); } catch(e) {}
-            showAutoSaveNotification(t('alerts.autoSavedLocal') || 'Backup saved locally');
+            return;
         }
-    } else {
-        try { localStorage.setItem('dnd_autosave_backup', JSON.stringify(data)); } catch(e) {}
-        console.log("Autosave to localStorage (no open file)");
+
+        console.warn("Autosave: file handle non valido, tentativo con percorso file.");
+        currentFileHandle = null;
+        stopPermissionKeepalive();
     }
+
+    if (currentFilePath) {
+        console.log("Autosave in progress to current file path...");
+        const success = await writeDataToPath(currentFilePath, data);
+        if (success) {
+            showAutoSaveNotification(t('alerts.autoSaved') || 'Auto-saved');
+            const saveBtn = document.querySelector('[onclick*="saveData"]') ||
+                            Array.from(document.querySelectorAll('.btn-success')).find(b =>
+                                b.textContent.includes(t('buttons.save')) || b.textContent.includes('Salva') || b.textContent.includes('Save')
+                            );
+            if (saveBtn) {
+                const originalText = saveBtn.textContent;
+                saveBtn.textContent = t('buttons.saved');
+                saveBtn.style.background = '#2d8a2d';
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.style.background = '';
+                }, 800);
+            }
+            return;
+        }
+        console.warn("Autosave: percorso file non valido, salvataggio su localStorage.");
+        currentFilePath = null;
+    }
+
+    try { localStorage.setItem('dnd_autosave_backup', JSON.stringify(data)); } catch(e) {}
+    console.log("Autosave to localStorage (no open file)");
 }
 
 function showAutoSaveNotification(msg) {
